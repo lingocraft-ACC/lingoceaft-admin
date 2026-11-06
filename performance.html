@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Performance Dashboard — Lingo Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link active"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Performance">Student Performance Monitoring</h1>
+            <p>Interactive circular student cards — click any student card to inspect full level, exam, and task analytics</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button type="button" class="btn btn-outline-danger btn-sm" id="quick-weak-filter-btn">
+            <i class="fa-solid fa-triangle-exclamation"></i> View Weak Performance (&lt;60%)
+          </button>
+          <a href="reports.html" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-file-pdf"></i> Student Reports
+          </a>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Search, Level, Range & Sort Toolbar -->
+        <div class="card mb-4">
+          <div class="card-body" style="padding:1.15rem 1.4rem;">
+            <div class="toolbar" style="margin-bottom:0;">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="perf-search-input" class="form-control" placeholder="Search students by full name or code...">
+              </div>
+
+              <div class="filter-group">
+                <select id="perf-level-filter" class="form-select" style="width:auto;min-width:170px;">
+                  <option value="">All Levels</option>
+                </select>
+
+                <select id="perf-range-filter" class="form-select" style="width:auto;min-width:185px;">
+                  <option value="">All Performance Ranges</option>
+                  <option value="excellent">Excellent (80% – 100%)</option>
+                  <option value="good">Good (60% – 79%)</option>
+                  <option value="weak">Weak / At Risk (&lt; 60%)</option>
+                </select>
+
+                <select id="perf-sort-select" class="form-select" style="width:auto;min-width:180px;">
+                  <option value="desc">Sort: Highest Performance</option>
+                  <option value="asc">Sort: Lowest Performance</option>
+                  <option value="name">Sort: Name (A &rarr; Z)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Circular Student Cards Grid (Section 13.1) -->
+        <div id="student-circular-cards-grid" class="student-circular-grid">
+          <div class="card" style="grid-column: 1 / -1;">
+            <div class="loading-state">
+              <span class="spinner"></span>
+              <p class="mt-2">Calculating normalized student performance metrics...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/reports.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allStudents = [];
+      let allLevels = [];
+
+      const gridEl = document.getElementById('student-circular-cards-grid');
+      const searchInput = document.getElementById('perf-search-input');
+      const levelFilter = document.getElementById('perf-level-filter');
+      const rangeFilter = document.getElementById('perf-range-filter');
+      const sortSelect = document.getElementById('perf-sort-select');
+      const weakBtn = document.getElementById('quick-weak-filter-btn');
+
+      async function loadData() {
+        try {
+          const res = await Promise.all([
+            window.API.getStudents(),
+            window.API.getLevels({}, { skipCache: true })
+          ]);
+          allStudents = res[0] || [];
+          allLevels = res[1] || [];
+
+          levelFilter.innerHTML = `<option value="">All Levels</option>` + allLevels.map(function(l) {
+            return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)}</option>`;
+          }).join('');
+
+          renderCards();
+        } catch (err) {
+          gridEl.innerHTML = `<div class="card" style="grid-column:1/-1;"><div class="empty-state"><p class="text-danger">${esc(err.message)}</p></div></div>`;
+        }
+      }
+
+      function renderCards() {
+        const q = searchInput.value.trim().toLowerCase();
+        const lvl = levelFilter.value;
+        const rng = rangeFilter.value;
+        const srt = sortSelect.value;
+
+        let filtered = allStudents.filter(function(stu) {
+          if (q) {
+            const mName = String(stu.Full_Name || '').toLowerCase().indexOf(q) !== -1;
+            const mCode = String(stu.Student_Code || '').toLowerCase().indexOf(q) !== -1;
+            if (!mName && !mCode) return false;
+          }
+          if (lvl && (stu.Assigned_Level_IDs || []).indexOf(lvl) === -1) return false;
+
+          const pct = Number(stu.Overall_Performance || 0);
+          if (rng === 'excellent' && pct < 80) return false;
+          if (rng === 'good' && (pct < 60 || pct >= 80)) return false;
+          if (rng === 'weak' && pct >= 60) return false;
+
+          return true;
+        });
+
+        filtered.sort(function(a, b) {
+          if (srt === 'asc') return Number(a.Overall_Performance || 0) - Number(b.Overall_Performance || 0);
+          if (srt === 'name') return String(a.Full_Name).localeCompare(String(b.Full_Name));
+          return Number(b.Overall_Performance || 0) - Number(a.Overall_Performance || 0);
+        });
+
+        if (filtered.length === 0) {
+          gridEl.innerHTML = `
+            <div class="card" style="grid-column: 1 / -1;">
+              <div class="empty-state">
+                <div class="empty-state-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                <h3>No Matching Students Found</h3>
+                <p>Adjust your search filters or add student records in Student Management.</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        gridEl.innerHTML = filtered.map(function(stu) {
+          const pct = Number(stu.Overall_Performance || 0);
+          const ringColor = window.Helpers.getPerformanceColor(pct);
+          const summary = stu.Performance_Summary || {};
+
+          const levelsPills = (stu.Assigned_Levels || []).map(function(l) {
+            return `<span class="badge badge-primary" style="font-size:0.7rem;">${esc(l.Level_Name)}</span>`;
+          }).join('') || `<span class="text-xs text-muted">No Levels Assigned</span>`;
+
+          return `
+            <div class="student-circular-card" data-student-card="${esc(stu.Student_ID)}">
+              <div style="position:absolute;top:0.85rem;inset-inline-end:0.85rem;">
+                ${window.Helpers.renderStatusBadge(stu.Account_Status)}
+              </div>
+
+              <div class="circular-progress-ring" style="--progress:${pct};--ring-color:${ringColor};">
+                <div class="circular-progress-inner">
+                  <div class="circular-avatar-initials">${esc(window.Helpers.getInitials(stu.Full_Name))}</div>
+                </div>
+                <span class="circular-pct-badge" style="background:${ringColor};">${pct}%</span>
+              </div>
+
+              <h3>${esc(stu.Full_Name)}</h3>
+              <span class="student-code-tag">${esc(stu.Student_Code)}</span>
+
+              <div class="student-levels-Row">${levelsPills}</div>
+
+              <div class="d-flex justify-between w-100 text-xs text-muted pt-3 mt-auto" style="border-top:1px solid var(--border-color);">
+                <span><i class="fa-solid fa-file-signature text-primary"></i> ${summary.completedExams || 0} Exams (${summary.examAverage || 0}%)</span>
+                <span><i class="fa-solid fa-list-check text-success"></i> ${summary.completedTasks || 0} Tasks (${summary.taskAverage || 0}%)</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        gridEl.querySelectorAll('[data-student-card]').forEach(function(card) {
+          card.addEventListener('click', function() {
+            const studentId = card.getAttribute('data-student-card');
+            window.ReportsUI.openStudentProfileModal(studentId);
+          });
+        });
+      }
+
+      weakBtn.addEventListener('click', function() {
+        rangeFilter.value = rangeFilter.value === 'weak' ? '' : 'weak';
+        sortSelect.value = 'asc';
+        renderCards();
+      });
+
+      [searchInput, levelFilter, rangeFilter, sortSelect].forEach(function(el) {
+        el.addEventListener('input', renderCards);
+        el.addEventListener('change', renderCards);
+      });
+
+      window.onBackendConnected = loadData;
+      loadData();
+    })();
+  </script>
+</body>
+</html>

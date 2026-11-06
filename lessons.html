@@ -1,0 +1,655 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lessons Management — Lingo Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link active"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Lessons">Lessons Management</h1>
+            <p>Author educational lessons, upload Google Drive media attachments, and link tasks &amp; exams</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="api-status-pill">
+            <span class="api-status-dot"></span>
+            <span class="api-status-label">GAS Backend</span>
+          </div>
+          <button type="button" class="btn btn-primary" id="open-add-lesson-btn">
+            <i class="fa-solid fa-plus"></i> Add New Lesson
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Toolbar -->
+        <div class="card mb-4">
+          <div class="card-body" style="padding:1.15rem 1.4rem;">
+            <div class="toolbar" style="margin-bottom:0;">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="lesson-search-input" class="form-control" placeholder="Search lessons by title or description...">
+              </div>
+              <div class="filter-group">
+                <select id="filter-lesson-level" class="form-select" style="width:auto;min-width:190px;">
+                  <option value="">All Levels</option>
+                </select>
+                <select id="filter-lesson-status" class="form-select" style="width:auto;min-width:150px;">
+                  <option value="">All Statuses</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lessons Table Card -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Lesson Title</th>
+                  <th>Parent Level</th>
+                  <th>Attachments</th>
+                  <th>Associated Content</th>
+                  <th>Status</th>
+                  <th>Created Date</th>
+                  <th style="text-align:end;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="lessons-tbody">
+                <tr>
+                  <td colspan="8" class="loading-state">
+                    <span class="spinner"></span>
+                    <p class="mt-2">Loading lessons...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add / Edit Lesson Modal -->
+  <div class="modal-backdrop" id="lesson-form-modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="lesson-modal-title"><i class="fa-solid fa-book-open text-primary"></i> Create New Lesson</h3>
+        <button type="button" class="modal-close" data-close-lesson-modal>&times;</button>
+      </div>
+      <form id="lesson-form" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="les-id-field">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="les-level">1. Select Parent Level First <span class="required">*</span></label>
+              <select id="les-level" class="form-select" required>
+                <option value="">-- Choose Educational Level --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="les-title">2. Lesson Title <span class="required">*</span></label>
+              <input type="text" id="les-title" class="form-control" placeholder="e.g. Unit 1: Present Perfect &amp; Time Expressions" required disabled>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="les-description">Lesson Description</label>
+            <input type="text" id="les-description" class="form-control" placeholder="Brief summary of what students will learn in this lesson...">
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label" for="les-image">Cover Image URL (Optional)</label>
+              <div class="d-flex gap-1">
+                <input type="url" id="les-image" class="form-control" placeholder="https://...">
+                <label class="btn btn-secondary btn-sm" style="cursor:pointer;" title="Upload Cover Image to Drive">
+                  <i class="fa-solid fa-upload"></i>
+                  <input type="file" id="les-cover-upload" class="d-none" accept="image/*">
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="les-order">Display Order</label>
+              <input type="number" id="les-order" class="form-control" min="1" value="1">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="les-status">Lesson Status</label>
+              <select id="les-status" class="form-select">
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="les-content">Lesson Educational Content (Supports HTML / Formatted Text) <span class="required">*</span></label>
+            <textarea id="les-content" class="form-control" rows="7" placeholder="Write the complete lesson material, explanations, examples, and study notes here..."></textarea>
+          </div>
+
+          <!-- Lesson Media Attachments Upload -->
+          <div class="form-group mb-0">
+            <div class="d-flex justify-between align-center mb-2">
+              <label class="form-label mb-0"><i class="fa-solid fa-paperclip text-primary"></i> Lesson Attachments (Images, Audio, Video uploaded to Google Drive)</label>
+              <div class="d-flex gap-2">
+                <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                  <i class="fa-solid fa-image text-primary"></i> + Image
+                  <input type="file" class="d-none" accept="image/*" data-upload-lesson-media="image">
+                </label>
+                <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                  <i class="fa-solid fa-volume-high text-success"></i> + Audio
+                  <input type="file" class="d-none" accept="audio/*" data-upload-lesson-media="audio">
+                </label>
+                <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                  <i class="fa-solid fa-video text-warning"></i> + Video
+                  <input type="file" class="d-none" accept="video/*" data-upload-lesson-media="video">
+                </label>
+              </div>
+            </div>
+            <div id="les-attachments-list" style="background:var(--bg-body);border:1px solid var(--border-color);border-radius:8px;padding:0.75rem;min-height:48px;"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-lesson-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-lesson-btn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Lesson
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lesson Details Preview Modal -->
+  <div class="modal-backdrop" id="lesson-preview-modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="lesson-preview-title">Lesson Details</h3>
+        <button type="button" class="modal-close" data-close-lesson-preview>&times;</button>
+      </div>
+      <div class="modal-body" id="lesson-preview-body"></div>
+      <div class="modal-footer justify-between" id="lesson-preview-footer"></div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/validation.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allLevels = [];
+      let allLessons = [];
+      let currentAttachments = [];
+
+      const tbody = document.getElementById('lessons-tbody');
+      const searchInput = document.getElementById('lesson-search-input');
+      const levelFilter = document.getElementById('filter-lesson-level');
+      const statusFilter = document.getElementById('filter-lesson-status');
+      const lesLevelSelect = document.getElementById('les-level');
+      const lesTitleInput = document.getElementById('les-title');
+
+      const preselectedLevel = window.Helpers.getQueryParam('levelId') || '';
+
+      async function loadData() {
+        try {
+          const res = await Promise.all([
+            window.API.getLevels({}, { skipCache: true }),
+            window.API.getLessons()
+          ]);
+          allLevels = res[0] || [];
+          allLessons = res[1] || [];
+
+          populateLevelDropdowns();
+          if (preselectedLevel && !levelFilter.value) {
+            levelFilter.value = preselectedLevel;
+          }
+          renderTable();
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><p class="text-danger">${esc(err.message)}</p></td></tr>`;
+        }
+      }
+
+      function populateLevelDropdowns() {
+        const curFilter = levelFilter.value;
+        levelFilter.innerHTML = `<option value="">All Levels</option>` + allLevels.map(function(l) {
+          return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)}</option>`;
+        }).join('');
+        levelFilter.value = curFilter;
+
+        lesLevelSelect.innerHTML = `<option value="">-- Choose Educational Level --</option>` + allLevels.map(function(l) {
+          return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)} (${esc(l.Level_ID)})</option>`;
+        }).join('');
+      }
+
+      // Enforce selecting Level before entering Lesson details
+      lesLevelSelect.addEventListener('change', function() {
+        const hasLevel = Boolean(lesLevelSelect.value);
+        lesTitleInput.disabled = !hasLevel;
+        if (hasLevel && !document.getElementById('les-id-field').value) {
+          const countInLevel = allLessons.filter(function(l) { return l.Level_ID === lesLevelSelect.value; }).length;
+          document.getElementById('les-order').value = countInLevel + 1;
+        }
+      });
+
+      function renderTable() {
+        const q = searchInput.value.trim().toLowerCase();
+        const lvl = levelFilter.value;
+        const st = statusFilter.value;
+
+        const filtered = allLessons.filter(function(l) {
+          if (q) {
+            const mTitle = String(l.Lesson_Title || '').toLowerCase().indexOf(q) !== -1;
+            const mDesc = String(l.Description || '').toLowerCase().indexOf(q) !== -1;
+            if (!mTitle && !mDesc) return false;
+          }
+          if (lvl && String(l.Level_ID) !== lvl) return false;
+          if (st && String(l.Status).toUpperCase() !== st) return false;
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-state-icon"><i class="fa-solid fa-book-open"></i></div>
+                <h3>No Lessons Found</h3>
+                <p>Click "Add New Lesson" and select a parent Level to create educational content.</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(function(les, idx) {
+          const attCount = Array.isArray(les.Attachments) ? les.Attachments.length : 0;
+          const isActive = String(les.Status).toUpperCase() === 'ACTIVE';
+
+          return `
+            <tr>
+              <td>
+                <div class="d-flex align-center gap-1">
+                  <span class="badge badge-secondary">#${les.Display_Order || (idx + 1)}</span>
+                  <button type="button" class="btn btn-ghost btn-sm" style="padding:2px 5px;" data-act="up" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''}><i class="fa-solid fa-caret-up"></i></button>
+                  <button type="button" class="btn btn-ghost btn-sm" style="padding:2px 5px;" data-act="down" data-idx="${idx}" ${idx === filtered.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-caret-down"></i></button>
+                </div>
+              </td>
+              <td>
+                <div class="font-bold">${esc(les.Lesson_Title)}</div>
+                <div class="text-xs text-muted">${esc(les.Description || '').substring(0, 65)}</div>
+              </td>
+              <td>
+                <span class="badge badge-primary">${esc(les.Level_Name || les.Level_ID)}</span>
+              </td>
+              <td>
+                <span class="badge badge-secondary"><i class="fa-solid fa-paperclip"></i> ${attCount} files</span>
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  <a href="exams.html?levelId=${encodeURIComponent(les.Level_ID)}&lessonId=${encodeURIComponent(les.Lesson_ID)}" class="badge badge-info" title="View/Add Exams for this Lesson">
+                    <i class="fa-solid fa-file-signature"></i> ${Number(les.Exams_Count || 0)} Exams
+                  </a>
+                  <a href="tasks.html?levelId=${encodeURIComponent(les.Level_ID)}&lessonId=${encodeURIComponent(les.Lesson_ID)}" class="badge badge-success" title="View/Add Tasks for this Lesson">
+                    <i class="fa-solid fa-list-check"></i> ${Number(les.Tasks_Count || 0)} Tasks
+                  </a>
+                </div>
+              </td>
+              <td>${window.Helpers.renderStatusBadge(les.Status)}</td>
+              <td class="text-sm text-muted">${window.Helpers.formatDate(les.Created_At)}</td>
+              <td style="text-align:end;white-space:nowrap;">
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="view" data-id="${esc(les.Lesson_ID)}" title="View Lesson Details"><i class="fa-solid fa-eye text-primary"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="edit" data-id="${esc(les.Lesson_ID)}" title="Edit Lesson"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="toggle" data-id="${esc(les.Lesson_ID)}" title="${isActive ? 'Deactivate' : 'Activate'}">
+                  <i class="fa-solid ${isActive ? 'fa-toggle-on text-success' : 'fa-toggle-off text-muted'}"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-outline-danger btn-sm" data-act="delete" data-id="${esc(les.Lesson_ID)}" title="Delete Lesson"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        bindTableActions(filtered);
+      }
+
+      function bindTableActions(displayedList) {
+        tbody.querySelectorAll('[data-act]').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            const act = btn.getAttribute('data-act');
+            const id = btn.getAttribute('data-id');
+
+            if (act === 'up' || act === 'down') {
+              const idx = Number(btn.getAttribute('data-idx'));
+              const swapIdx = act === 'up' ? idx - 1 : idx + 1;
+              if (swapIdx < 0 || swapIdx >= displayedList.length) return;
+              const ids = displayedList.map(function(l) { return l.Lesson_ID; });
+              const tmp = ids[idx];
+              ids[idx] = ids[swapIdx];
+              ids[swapIdx] = tmp;
+              try {
+                await window.API.reorderLessons({ lessonIds: ids });
+                window.Helpers.showToast('Lessons reordered.', 'success');
+                await loadData();
+              } catch (err) {
+                window.Helpers.showToast(err.message, 'error');
+              }
+              return;
+            }
+
+            const lesson = allLessons.find(function(l) { return l.Lesson_ID === id; });
+            if (!lesson) return;
+
+            if (act === 'view') {
+              openLessonPreview(lesson);
+            } else if (act === 'edit') {
+              openEditLessonModal(lesson);
+            } else if (act === 'toggle') {
+              const nextStatus = String(lesson.Status).toUpperCase() === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+              try {
+                await window.API.updateLesson({ lessonId: id, status: nextStatus });
+                window.Helpers.showToast('Lesson status updated to ' + nextStatus, 'success');
+                await loadData();
+              } catch (err) {
+                window.Helpers.showToast(err.message, 'error');
+              }
+            } else if (act === 'delete') {
+              const ok = await window.Helpers.confirmDialog({
+                title: 'Delete Lesson',
+                message: 'Are you sure you want to delete "' + lesson.Lesson_Title + '"?',
+                confirmText: 'Delete Lesson',
+                danger: true
+              });
+              if (ok) {
+                try {
+                  await window.API.deleteLesson({ lessonId: id });
+                  window.Helpers.showToast('Lesson deleted.', 'success');
+                  await loadData();
+                } catch (err) {
+                  window.Helpers.showToast(err.message, 'error');
+                }
+              }
+            }
+          });
+        });
+      }
+
+      function renderAttachmentsList() {
+        const box = document.getElementById('les-attachments-list');
+        if (!box) return;
+        if (currentAttachments.length === 0) {
+          box.innerHTML = `<span class="text-xs text-muted">No media attachments uploaded for this lesson yet.</span>`;
+          return;
+        }
+        box.innerHTML = currentAttachments.map(function(att, idx) {
+          return `
+            <div class="d-flex justify-between align-center py-1" style="padding:0.35rem 0;border-bottom:1px solid var(--border-color);">
+              <div class="text-sm">
+                <span class="badge badge-secondary">${esc((att.file_type || 'file').toUpperCase())}</span>
+                <strong>${esc(att.file_name)}</strong>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm text-danger" data-remove-att="${idx}">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        box.querySelectorAll('[data-remove-att]').forEach(function(b) {
+          b.addEventListener('click', function() {
+            const i = Number(b.getAttribute('data-remove-att'));
+            currentAttachments.splice(i, 1);
+            renderAttachmentsList();
+          });
+        });
+      }
+
+      // Cover image upload to Drive
+      document.getElementById('les-cover-upload').addEventListener('change', async function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const check = window.Validation.validateMediaFile(file, 'image');
+        if (!check.valid) {
+          window.Helpers.showToast(check.error, 'error');
+          return;
+        }
+        try {
+          window.Helpers.showToast('Uploading lesson cover image to Google Drive...', 'info');
+          const up = await window.API.uploadMediaFile(file, 'image', 'LESSON_COVER');
+          document.getElementById('les-image').value = up.url;
+          window.Helpers.showToast('Cover image uploaded.', 'success');
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      // Lesson media attachments upload
+      document.querySelectorAll('[data-upload-lesson-media]').forEach(function(input) {
+        input.addEventListener('change', async function() {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          const mType = input.getAttribute('data-upload-lesson-media');
+          const check = window.Validation.validateMediaFile(file, mType);
+          if (!check.valid) {
+            window.Helpers.showToast(check.error, 'error');
+            input.value = '';
+            return;
+          }
+          try {
+            window.Helpers.showToast('Uploading ' + mType + ' attachment to Google Drive...', 'info');
+            const uploaded = await window.API.uploadMediaFile(file, mType, 'LESSON_ATTACHMENT');
+            currentAttachments.push(uploaded);
+            renderAttachmentsList();
+            window.Helpers.showToast('Attachment uploaded to Google Drive.', 'success');
+          } catch (err) {
+            window.Helpers.showToast(err.message, 'error');
+          }
+        });
+      });
+
+      const modal = document.getElementById('lesson-form-modal');
+      const form = document.getElementById('lesson-form');
+
+      document.getElementById('open-add-lesson-btn').addEventListener('click', function() {
+        document.getElementById('lesson-modal-title').innerHTML = '<i class="fa-solid fa-book-open text-primary"></i> Create New Lesson';
+        document.getElementById('les-id-field').value = '';
+        form.reset();
+        currentAttachments = [];
+        renderAttachmentsList();
+
+        if (levelFilter.value) {
+          lesLevelSelect.value = levelFilter.value;
+          lesTitleInput.disabled = false;
+        } else {
+          lesTitleInput.disabled = true;
+        }
+        modal.classList.add('active');
+      });
+
+      function openEditLessonModal(les) {
+        document.getElementById('lesson-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Lesson';
+        document.getElementById('les-id-field').value = les.Lesson_ID;
+        lesLevelSelect.value = les.Level_ID;
+        lesTitleInput.disabled = false;
+        lesTitleInput.value = les.Lesson_Title || '';
+        document.getElementById('les-description').value = les.Description || '';
+        document.getElementById('les-image').value = les.Image_URL || '';
+        document.getElementById('les-order').value = les.Display_Order || 1;
+        document.getElementById('les-status').value = les.Status || 'ACTIVE';
+        document.getElementById('les-content').value = les.Content || '';
+        currentAttachments = Array.isArray(les.Attachments) ? les.Attachments.slice() : [];
+        renderAttachmentsList();
+        modal.classList.add('active');
+      }
+
+      document.querySelectorAll('[data-close-lesson-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { modal.classList.remove('active'); });
+      });
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const lessonId = document.getElementById('les-id-field').value.trim();
+        const levelId = lesLevelSelect.value;
+        const lessonTitle = lesTitleInput.value.trim();
+
+        if (!levelId) {
+          window.Helpers.showToast('Please select the parent Level first.', 'error');
+          return;
+        }
+        if (!lessonTitle) {
+          window.Helpers.showToast('Lesson Title is required.', 'error');
+          return;
+        }
+
+        const payload = {
+          lessonId: lessonId,
+          levelId: levelId,
+          lessonTitle: lessonTitle,
+          description: document.getElementById('les-description').value.trim(),
+          imageUrl: document.getElementById('les-image').value.trim(),
+          displayOrder: Number(document.getElementById('les-order').value || 1),
+          status: document.getElementById('les-status').value,
+          content: document.getElementById('les-content').value,
+          attachments: currentAttachments
+        };
+
+        const saveBtn = document.getElementById('save-lesson-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner spinner-sm spinner-white"></span> Saving...';
+
+        try {
+          if (lessonId) {
+            await window.API.updateLesson(payload);
+            window.Helpers.showToast('Lesson updated successfully.', 'success');
+          } else {
+            await window.API.createLesson(payload);
+            window.Helpers.showToast('Lesson created and linked to level.', 'success');
+          }
+          modal.classList.remove('active');
+          await loadData();
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Lesson';
+        }
+      });
+
+      // Lesson Preview Modal
+      const previewModal = document.getElementById('lesson-preview-modal');
+      document.querySelectorAll('[data-close-lesson-preview]').forEach(function(b) {
+        b.addEventListener('click', function() { previewModal.classList.remove('active'); });
+      });
+
+      function openLessonPreview(les) {
+        document.getElementById('lesson-preview-title').innerHTML = `<i class="fa-solid fa-book-open text-primary"></i> ${esc(les.Lesson_Title)}`;
+        const atts = Array.isArray(les.Attachments) ? les.Attachments : [];
+        document.getElementById('lesson-preview-body').innerHTML = `
+          <div class="d-flex justify-between align-center mb-3">
+            <span class="badge badge-primary">${esc(les.Level_Name || les.Level_ID)}</span>
+            ${window.Helpers.renderStatusBadge(les.Status)}
+          </div>
+          ${les.Image_URL ? `<img src="${esc(les.Image_URL)}" alt="Cover" style="max-height:240px;width:100%;object-fit:cover;border-radius:10px;margin-bottom:1rem;">` : ''}
+          <p class="text-secondary mb-3"><strong>Summary:</strong> ${esc(les.Description || '—')}</p>
+          <div class="lesson-content-prose" style="background:var(--bg-body);padding:1.25rem;border-radius:10px;border:1px solid var(--border-color);white-space:pre-wrap;">${esc(les.Content || 'No lesson body content.')}</div>
+          ${atts.length > 0 ? `
+            <h4 class="font-bold mt-4 mb-2">Attached Educational Media (${atts.length})</h4>
+            <div class="d-flex flex-column gap-2">
+              ${atts.map(function(a) {
+                if (a.file_type === 'image') return `<div><span class="text-xs font-bold">${esc(a.file_name)}</span><img src="${esc(a.url)}" style="max-height:220px;border-radius:8px;"></div>`;
+                if (a.file_type === 'audio') return `<div><span class="text-xs font-bold">${esc(a.file_name)}</span><audio controls src="${esc(a.url)}" class="w-100"></audio></div>`;
+                if (a.file_type === 'video') return `<div><span class="text-xs font-bold">${esc(a.file_name)}</span><video controls src="${esc(a.url)}" style="max-height:260px;width:100%;border-radius:8px;"></video></div>`;
+                return `<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.file_name)}</a>`;
+              }).join('')}
+            </div>
+          ` : ''}
+        `;
+        document.getElementById('lesson-preview-footer').innerHTML = `
+          <div class="d-flex gap-2">
+            <a href="tasks.html?levelId=${encodeURIComponent(les.Level_ID)}&lessonId=${encodeURIComponent(les.Lesson_ID)}" class="btn btn-outline-primary btn-sm">
+              <i class="fa-solid fa-list-check"></i> Associate / Manage Tasks
+            </a>
+            <a href="exams.html?levelId=${encodeURIComponent(les.Level_ID)}&lessonId=${encodeURIComponent(les.Lesson_ID)}" class="btn btn-outline-primary btn-sm">
+              <i class="fa-solid fa-file-signature"></i> Associate / Manage Exams
+            </a>
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('lesson-preview-modal').classList.remove('active')">Close</button>
+        `;
+        previewModal.classList.add('active');
+      }
+
+      searchInput.addEventListener('input', renderTable);
+      levelFilter.addEventListener('change', renderTable);
+      statusFilter.addEventListener('change', renderTable);
+
+      window.onBackendConnected = loadData;
+      loadData();
+    })();
+  </script>
+</body>
+</html>

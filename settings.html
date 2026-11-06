@@ -1,0 +1,294 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings &amp; Database Health — Lingo Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link active"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Settings">System Settings &amp; Infrastructure</h1>
+            <p>Manage Google Sheets database health, Drive folder hierarchy, platform preferences, and administrator security</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="api-status-pill">
+            <span class="api-status-dot"></span>
+            <span class="api-status-label">GAS Backend</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="charts-grid">
+          <!-- 1. Platform Settings Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-sliders text-primary"></i> Platform Configuration (`System_Settings`)</h3>
+            </div>
+            <form id="system-settings-form" class="card-body">
+              <div class="form-group">
+                <label class="form-label" for="set-platform-name">Platform Name</label>
+                <input type="text" id="set-platform-name" class="form-control" value="Lingo Examination &amp; Learning Platform">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="set-report-title">Official Student Report Title</label>
+                <input type="text" id="set-report-title" class="form-control" value="Official Academic Performance Report">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="set-default-pass">Default Passing Score (%)</label>
+                  <input type="number" id="set-default-pass" class="form-control" min="1" max="100" value="50">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="set-inst-email">Institution Contact Email</label>
+                  <input type="email" id="set-inst-email" class="form-control" value="admin@examination-platform.edu">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-chip mb-2">
+                  <input type="checkbox" id="set-allow-review" checked>
+                  <span>Allow Students to Review Correct/Incorrect Answers After Exam Submission</span>
+                </label>
+                <label class="checkbox-chip">
+                  <input type="checkbox" id="set-allow-explanations" checked>
+                  <span>Allow Students to View Question Explanations After Grading</span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="save-settings-btn">
+                <i class="fa-solid fa-floppy-disk"></i> Save System Settings
+              </button>
+            </form>
+          </div>
+
+          <!-- 2. Google Sheets & Drive Health & Maintenance -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-database text-success"></i> Google Sheets &amp; Drive Infrastructure</h3>
+              <button type="button" class="btn btn-secondary btn-sm" id="run-health-check-btn">
+                <i class="fa-solid fa-heart-pulse text-danger"></i> Run Health Check
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Connected Google Spreadsheet ID</label>
+                <div class="d-flex gap-2">
+                  <input type="text" class="form-control" value="1RlvD6UnNKfY_pcPgQMGr7ilmhzzeBBSFHrCyGs0Kejg" readonly style="font-family:monospace;background:var(--bg-muted);">
+                  <a href="https://docs.google.com/spreadsheets/d/1RlvD6UnNKfY_pcPgQMGr7ilmhzzeBBSFHrCyGs0Kejg/edit" target="_blank" rel="noopener" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Sheet
+                  </a>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap gap-2 mb-4">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="init-db-btn">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Initialize All 11 Sheets &amp; Headers
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="init-drive-btn">
+                  <i class="fa-brands fa-google-drive"></i> Verify Drive Folder Tree
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="create-backup-btn">
+                  <i class="fa-solid fa-box-archive text-warning"></i> Create Drive Backup JSON
+                </button>
+              </div>
+
+              <div id="health-check-output" style="background:var(--bg-body);border:1px solid var(--border-color);border-radius:10px;padding:1rem;font-size:0.84rem;max-height:260px;overflow-y:auto;">
+                Click "Run Health Check" to inspect all 11 Google Sheets tables and Drive storage status.
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Starter JSON Templates & Backend Connection -->
+          <div class="card" style="grid-column:1/-1;">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-file-code text-primary"></i> Starter JSON Templates &amp; Backend Connection</h3>
+            </div>
+            <div class="card-body d-flex justify-between align-center flex-wrap gap-3">
+              <div>
+                <h4 class="text-sm font-bold mb-1">Download Sample Exam &amp; Task JSON Templates (All 8 Question Types)</h4>
+                <p class="text-xs text-muted mb-0">Import these starter JSON files directly in the Exams or Tasks modules, or configure your Google Apps Script Web App URL.</p>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="templates/exam_template.json" download="exam_template.json" class="btn btn-secondary btn-sm">
+                  <i class="fa-solid fa-download text-primary"></i> Download exam_template.json
+                </a>
+                <a href="templates/task_template.json" download="task_template.json" class="btn btn-secondary btn-sm">
+                  <i class="fa-solid fa-download text-success"></i> Download task_template.json
+                </a>
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.API.openConfigModal()">
+                  <i class="fa-solid fa-plug"></i> Configure GAS Web App URL
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      const healthBox = document.getElementById('health-check-output');
+
+      async function loadSettings() {
+        try {
+          const settings = await window.API.getSystemSettings({}, { skipCache: true });
+          if (settings) {
+            if (settings.PLATFORM_NAME) document.getElementById('set-platform-name').value = settings.PLATFORM_NAME;
+            if (settings.REPORT_HEADER_TITLE) document.getElementById('set-report-title').value = settings.REPORT_HEADER_TITLE;
+            if (settings.DEFAULT_PASSING_SCORE) document.getElementById('set-default-pass').value = settings.DEFAULT_PASSING_SCORE;
+            if (settings.INSTITUTION_EMAIL) document.getElementById('set-inst-email').value = settings.INSTITUTION_EMAIL;
+            document.getElementById('set-allow-review').checked = settings.ALLOW_STUDENT_REVIEW_ANSWERS !== 'false';
+            document.getElementById('set-allow-explanations').checked = settings.ALLOW_STUDENT_VIEW_EXPLANATIONS !== 'false';
+          }
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      }
+
+      document.getElementById('system-settings-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+          await window.API.updateSystemSettings({
+            settings: {
+              PLATFORM_NAME: document.getElementById('set-platform-name').value.trim(),
+              REPORT_HEADER_TITLE: document.getElementById('set-report-title').value.trim(),
+              DEFAULT_PASSING_SCORE: String(document.getElementById('set-default-pass').value || '50'),
+              INSTITUTION_EMAIL: document.getElementById('set-inst-email').value.trim(),
+              ALLOW_STUDENT_REVIEW_ANSWERS: document.getElementById('set-allow-review').checked ? 'true' : 'false',
+              ALLOW_STUDENT_VIEW_EXPLANATIONS: document.getElementById('set-allow-explanations').checked ? 'true' : 'false'
+            }
+          });
+          window.Helpers.showToast('System settings saved to Google Sheets.', 'success');
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      document.getElementById('run-health-check-btn').addEventListener('click', async function() {
+        healthBox.innerHTML = `<span class="spinner spinner-sm"></span> Checking database tables and Drive storage...`;
+        try {
+          const health = await window.API.checkDatabaseHealth();
+          const tables = health.tables || {};
+          const rowsHtml = Object.keys(tables).map(function(tName) {
+            const t = tables[tName];
+            return `<div class="d-flex justify-between align-center py-1" style="border-bottom:1px solid var(--border-color);padding:3px 0;">
+              <span><strong>${esc(tName)}</strong> (${t.rowCount} records)</span>
+              <span class="badge ${t.healthy ? 'badge-success' : 'badge-danger'}">${t.healthy ? 'HEALTHY' : 'MISSING COLS'}</span>
+            </div>`;
+          }).join('');
+
+          healthBox.innerHTML = `
+            <div class="mb-2">
+              <strong>Overall Status:</strong> ${health.healthy ? '<span class="text-success font-bold">ALL SYSTEMS HEALTHY</span>' : '<span class="text-danger font-bold">NEEDS INITIALIZATION</span>'}
+              &bull; <strong>Drive Root Folder ID:</strong> <code>${esc(health.rootFolderId || 'N/A')}</code>
+            </div>
+            ${rowsHtml}
+          `;
+        } catch (err) {
+          healthBox.innerHTML = `<span class="text-danger">${esc(err.message)}</span>`;
+        }
+      });
+
+      document.getElementById('init-db-btn').addEventListener('click', async function() {
+        try {
+          window.Helpers.showToast('Initializing all 11 sheets and Drive folders...', 'info');
+          const res = await window.API.initializeDatabase();
+          window.Helpers.showToast('Database initialized successfully!', 'success');
+          healthBox.innerHTML = `<span class="text-success font-bold"><i class="fa-solid fa-circle-check"></i> Initialized at ${esc(res.initializedAt)}</span>`;
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      document.getElementById('init-drive-btn').addEventListener('click', async function() {
+        try {
+          window.Helpers.showToast('Verifying Google Drive folder hierarchy...', 'info');
+          const folders = await window.API.createDriveFolders();
+          window.Helpers.showToast('Drive folder structure verified!', 'success');
+          healthBox.innerHTML = `<div><strong>Drive Root Folder ID:</strong> <code>${esc(folders.rootFolderId)}</code></div>`;
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      document.getElementById('create-backup-btn').addEventListener('click', async function() {
+        try {
+          window.Helpers.showToast('Creating full database JSON backup in Google Drive...', 'info');
+          const bk = await window.API.createDatabaseBackup();
+          window.Helpers.showToast('Backup created: ' + bk.fileName, 'success');
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      window.onBackendConnected = loadSettings;
+      loadSettings();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+{
+  "schema_version": "1.0",
+  "type": "exam",
+  "exam_id": "EXAM_L001_001",
+  "title": "Level 1 Comprehensive Assessment Exam",
+  "level_id": "LEVEL_001",
+  "lesson_id": "LESSON_001",
+  "description": "Official Level 1 examination evaluating reading comprehension, grammar accuracy, vocabulary usage, sentence structure, and analytical writing across all 8 supported question types.",
+  "instructions": "Read every question carefully before selecting or entering your answer. You may flag questions to revisit before submitting. The exam will automatically submit when the countdown timer expires.",
+  "settings": {
+    "duration_minutes": 30,
+    "total_marks": 100,
+    "passing_score": 50,
+    "max_attempts": 2,
+    "random_questions": false,
+    "random_options": false,
+    "allow_review": true,
+    "show_explanations": true
+  },
+  "_supported_question_types": [
+    "multiple_choice_single",
+    "multiple_choice_multiple",
+    "true_false",
+    "short_answer",
+    "fill_in_the_blanks",
+    "matching",
+    "ordering",
+    "essay"
+  ],
+  "questions": [
+    {
+      "question_id": "Q001",
+      "type": "multiple_choice_single",
+      "order": 1,
+      "difficulty": "easy",
+      "text": "Choose the correct form of the verb to complete the sentence: 'Neither the teacher nor the students _____ aware of the schedule change yesterday.'",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [
+        {
+          "option_id": "A",
+          "text": "was"
+        },
+        {
+          "option_id": "B",
+          "text": "were"
+        },
+        {
+          "option_id": "C",
+          "text": "is"
+        },
+        {
+          "option_id": "D",
+          "text": "has been"
+        }
+      ],
+      "correct_answer": "B",
+      "points": 10,
+      "explanation": "With 'neither...nor', the verb agrees with the closer subject ('students', plural) in the past tense ('yesterday' -> 'were')."
+    },
+    {
+      "question_id": "Q002",
+      "type": "multiple_choice_multiple",
+      "order": 2,
+      "difficulty": "medium",
+      "text": "Which of the following sentences are written in the PASSIVE voice? (Select all that apply)",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The new examination portal was designed by the engineering team."
+        },
+        {
+          "option_id": "B",
+          "text": "Students completed their assignments before the deadline."
+        },
+        {
+          "option_id": "C",
+          "text": "All exam results are calculated automatically by the backend."
+        },
+        {
+          "option_id": "D",
+          "text": "The instructor reviewed the essay submissions carefully."
+        }
+      ],
+      "correct_answer": ["A", "C"],
+      "points": 12,
+      "explanation": "Sentences A ('was designed') and C ('are calculated') use the passive structure (be + past participle)."
+    },
+    {
+      "question_id": "Q003",
+      "type": "true_false",
+      "order": 3,
+      "difficulty": "easy",
+      "text": "A dependent (subordinate) clause can stand alone as a complete grammatical sentence.",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [
+        {
+          "option_id": "TRUE",
+          "text": "True"
+        },
+        {
+          "option_id": "FALSE",
+          "text": "False"
+        }
+      ],
+      "correct_answer": "FALSE",
+      "points": 8,
+      "explanation": "A dependent clause cannot stand alone as a sentence; it must be connected to an independent clause."
+    },
+    {
+      "question_id": "Q004",
+      "type": "short_answer",
+      "order": 4,
+      "difficulty": "medium",
+      "text": "Enter the comparative form of the adjective 'good':",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [],
+      "correct_answer": "better",
+      "points": 10,
+      "explanation": "'Good' is an irregular adjective whose comparative form is 'better' and superlative form is 'best'."
+    },
+    {
+      "question_id": "Q005",
+      "type": "fill_in_the_blanks",
+      "order": 5,
+      "difficulty": "medium",
+      "text": "Fill in the missing prepositions: She is highly proficient _____ academic writing and always submits her work _____ time.",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [],
+      "correct_answer": ["in", "on"],
+      "points": 12,
+      "explanation": "The adjective 'proficient' collocates with 'in' (or 'at'), and 'on time' means punctual/before the deadline."
+    },
+    {
+      "question_id": "Q006",
+      "type": "matching",
+      "order": 6,
+      "difficulty": "medium",
+      "text": "Match each sentence type on the left with its corresponding example on the right:",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "pairs": [
+        {
+          "pair_id": "P1",
+          "left": "Declarative Sentence",
+          "right": "The library opens at eight o'clock every morning."
+        },
+        {
+          "pair_id": "P2",
+          "left": "Interrogative Sentence",
+          "right": "Have you completed all the assigned practice tasks?"
+        },
+        {
+          "pair_id": "P3",
+          "left": "Imperative Sentence",
+          "right": "Please review your answers carefully before clicking submit."
+        }
+      ],
+      "correct_answer": {
+        "P1": "The library opens at eight o'clock every morning.",
+        "P2": "Have you completed all the assigned practice tasks?",
+        "P3": "Please review your answers carefully before clicking submit."
+      },
+      "points": 15,
+      "explanation": "Declarative sentences state facts, interrogative sentences ask questions, and imperative sentences issue instructions or requests."
+    },
+    {
+      "question_id": "Q007",
+      "type": "ordering",
+      "order": 7,
+      "difficulty": "medium",
+      "text": "Order the stages of the academic writing process from first (top) to last (bottom):",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "items": [
+        "Brainstorming & Outlining",
+        "Writing the First Draft",
+        "Revising Content & Structure",
+        "Final Proofreading & Submission"
+      ],
+      "correct_answer": [
+        "Brainstorming & Outlining",
+        "Writing the First Draft",
+        "Revising Content & Structure",
+        "Final Proofreading & Submission"
+      ],
+      "points": 13,
+      "explanation": "Effective writing progresses from planning/outlining to drafting, structural revision, and final proofreading."
+    },
+    {
+      "question_id": "Q008",
+      "type": "essay",
+      "order": 8,
+      "difficulty": "hard",
+      "text": "Write a well-structured short essay (120–180 words) discussing the benefits of continuous assessment (tasks and quizzes) compared to relying solely on a single final examination.",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [],
+      "correct_answer": "Grading Rubric: Thesis statement & introduction (5 pts), comparison of continuous tasks vs single exam with supporting points (10 pts), grammar, vocabulary & cohesion (5 pts).",
+      "points": 20,
+      "explanation": "Evaluated by the instructor based on analytical depth, organization, and language accuracy."
+    }
+  ]
+}

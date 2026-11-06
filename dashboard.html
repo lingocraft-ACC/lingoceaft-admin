@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Overview Dashboard — Lingo Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Dashboard">Executive Dashboard</h1>
+            <p>Real-time platform overview, student performance distribution, and curriculum metrics</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="api-status-pill">
+            <span class="api-status-dot"></span>
+            <span class="api-status-label">GAS Backend</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="refresh-dashboard-btn">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" data-action="toggle-lang">
+            <i class="fa-solid fa-language"></i> <span data-lang-toggleLabel>عربي</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- 8 KPI Summary Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Total Students</span>
+              <h3 class="kpi-value" id="kpi-total-students">0</h3>
+              <p class="kpi-sub">Registered accounts</p>
+            </div>
+            <div class="kpi-icon indigo"><i class="fa-solid fa-users"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Active Students</span>
+              <h3 class="kpi-value" id="kpi-active-students">0</h3>
+              <p class="kpi-sub">Enabled portal access</p>
+            </div>
+            <div class="kpi-icon emerald"><i class="fa-solid fa-user-check"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Total Levels</span>
+              <h3 class="kpi-value" id="kpi-total-levels">0</h3>
+              <p class="kpi-sub">Curriculum stages</p>
+            </div>
+            <div class="kpi-icon purple"><i class="fa-solid fa-layer-group"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Total Lessons</span>
+              <h3 class="kpi-value" id="kpi-total-lessons">0</h3>
+              <p class="kpi-sub">Published study units</p>
+            </div>
+            <div class="kpi-icon sky"><i class="fa-solid fa-book-open"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Total Exams</span>
+              <h3 class="kpi-value" id="kpi-total-exams">0</h3>
+              <p class="kpi-sub">Drive JSON assessments</p>
+            </div>
+            <div class="kpi-icon amber"><i class="fa-solid fa-file-signature"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Total Tasks</span>
+              <h3 class="kpi-value" id="kpi-total-tasks">0</h3>
+              <p class="kpi-sub">Coursework assignments</p>
+            </div>
+            <div class="kpi-icon indigo"><i class="fa-solid fa-list-check"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Total Submissions</span>
+              <h3 class="kpi-value" id="kpi-total-submissions">0</h3>
+              <p class="kpi-sub" id="kpi-submissions-sub">Exams &amp; Tasks combined</p>
+            </div>
+            <div class="kpi-icon sky"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <span class="kpi-label">Average Performance</span>
+              <h3 class="kpi-value" id="kpi-avg-performance">0%</h3>
+              <p class="kpi-sub">Normalized platform score</p>
+            </div>
+            <div class="kpi-icon emerald"><i class="fa-solid fa-chart-pie"></i></div>
+          </div>
+        </div>
+
+        <!-- Visual Analytics Charts Grid -->
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-chart-column text-primary"></i> Student Performance Distribution</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="chart-perf-distribution"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-chart-pie text-success"></i> Overall Exam Results Breakdown</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="chart-exam-results"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-wave-square text-primary"></i> Student Learning Activity (Last 7 Days)</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="chart-student-activity"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-layer-group text-warning"></i> Performance &amp; Completion Rates by Level</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="chart-level-performance"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top-Performing Students & Students Needing Improvement -->
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-trophy text-warning"></i> Top-Performing Students</h3>
+              <a href="performance.html" class="btn btn-ghost btn-sm">View All &rarr;</a>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Levels</th>
+                    <th>Overall Score</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="top-students-tbody">
+                  <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-triangle-exclamation text-danger"></i> Students Needing Improvement (&lt; 60%)</h3>
+              <a href="reports.html" class="btn btn-ghost btn-sm">Generate Reports &rarr;</a>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Levels</th>
+                    <th>Overall Score</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="needs-improvement-tbody">
+                  <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/reports.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+
+      async function loadDashboard() {
+        try {
+          const stats = await window.API.getDashboardStatistics();
+          const cards = stats.summaryCards || {};
+
+          document.getElementById('kpi-total-students').textContent = cards.totalStudents || 0;
+          document.getElementById('kpi-active-students').textContent = cards.activeStudents || 0;
+          document.getElementById('kpi-total-levels').textContent = cards.totalLevels || 0;
+          document.getElementById('kpi-total-lessons').textContent = cards.totalLessons || 0;
+          document.getElementById('kpi-total-exams').textContent = cards.totalExams || 0;
+          document.getElementById('kpi-total-tasks').textContent = cards.totalTasks || 0;
+          document.getElementById('kpi-total-submissions').textContent = cards.totalSubmissions || 0;
+          document.getElementById('kpi-submissions-sub').textContent =
+            (cards.examSubmissions || 0) + ' Exams / ' + (cards.taskSubmissions || 0) + ' Tasks';
+          document.getElementById('kpi-avg-performance').textContent = (cards.averageStudentPerformance || 0) + '%';
+
+          if (stats.charts) {
+            window.Charts.renderPerformanceDistributionChart('chart-perf-distribution', stats.charts.performanceDistribution);
+            window.Charts.renderExamResultsChart('chart-exam-results', stats.charts.examResultsOverview);
+            window.Charts.renderStudentActivityChart('chart-student-activity', stats.charts.studentActivityTrend);
+            window.Charts.renderPerformanceByLevelChart('chart-level-performance', stats.charts.performanceByLevel);
+          }
+
+          renderStudentList('top-students-tbody', stats.topPerformingStudents || [], 'No graded student records yet.');
+          renderStudentList('needs-improvement-tbody', stats.studentsNeedingImprovement || [], 'No students currently below the 60% threshold.');
+        } catch (err) {
+          window.Helpers.showToast('Dashboard load error: ' + err.message, 'error');
+        }
+      }
+
+      function renderStudentList(tbodyId, list, emptyMsg) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        if (!Array.isArray(list) || list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted" style="padding:1.75rem;">${esc(emptyMsg)}</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = list.map(function(stu) {
+          const pct = Number(stu.Overall_Performance || 0);
+          const color = window.Helpers.getPerformanceColor(pct);
+          const levelsHtml = (stu.Assigned_Levels || []).map(function(l) {
+            return `<span class="badge badge-secondary">${esc(l.Level_Name)}</span>`;
+          }).join(' ');
+          return `
+            <tr>
+              <td>
+                <div class="d-flex align-center gap-2">
+                  <div class="avatar avatar-sm">${esc(window.Helpers.getInitials(stu.Full_Name))}</div>
+                  <div>
+                    <div class="font-semibold">${esc(stu.Full_Name)}</div>
+                    <div class="text-xs text-muted" style="font-family:monospace;">${esc(stu.Student_Code)}</div>
+                  </div>
+                </div>
+              </td>
+              <td>${levelsHtml || '<span class="text-muted text-xs">Unassigned</span>'}</td>
+              <td><span class="badge" style="background:${color}20;color:${color};font-size:0.85rem;">${pct}%</span></td>
+              <td>
+                <button type="button" class="btn btn-secondary btn-sm" data-view-profile="${esc(stu.Student_ID)}">
+                  <i class="fa-solid fa-chart-pie"></i> Profile
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('[data-view-profile]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            window.ReportsUI.openStudentProfileModal(btn.getAttribute('data-view-profile'));
+          });
+        });
+      }
+
+      document.getElementById('refresh-dashboard-btn').addEventListener('click', function() {
+        window.API.clearCache();
+        loadDashboard();
+      });
+
+      window.onBackendConnected = loadDashboard;
+      loadDashboard();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Performance Reports — Lingo Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar no-print">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link active"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <header class="topbar no-print">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Reports">Student Performance Reports</h1>
+            <p>Generate, print, save as PDF, and export official 12-section student academic transcripts</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button type="button" class="btn btn-secondary btn-sm" id="export-csv-btn" disabled>
+            <i class="fa-solid fa-file-csv text-success"></i> Export Detailed CSV
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="print-report-btn" disabled>
+            <i class="fa-solid fa-print"></i> Print / Save as PDF
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Student Selection Bar (Hidden when printing) -->
+        <div class="card mb-4 no-print">
+          <div class="card-body" style="padding:1.15rem 1.4rem;">
+            <div class="d-flex align-center justify-between flex-wrap gap-3">
+              <div class="d-flex align-center gap-3 flex-wrap" style="flex:1;">
+                <label class="font-bold text-sm" for="report-student-select">
+                  <i class="fa-solid fa-user-graduate text-primary"></i> Select Student to Generate Report:
+                </label>
+                <select id="report-student-select" class="form-select" style="max-width:420px;">
+                  <option value="">-- Choose a Student --</option>
+                </select>
+                <button type="button" class="btn btn-primary" id="generate-report-btn">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Report
+                </button>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="export-all-students-csv-btn">
+                <i class="fa-solid fa-table"></i> Export All Students Summary CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Output Container -->
+        <div id="report-render-mount">
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="fa-solid fa-file-contract"></i></div>
+              <h3>Select a Student to Generate Report</h3>
+              <p>Choose any student from the selector above to generate a complete 12-section academic performance report with charts, tables, strengths, weaknesses, and final evaluation.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/reports.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allStudents = [];
+      let currentReportData = null;
+
+      const studentSelect = document.getElementById('report-student-select');
+      const generateBtn = document.getElementById('generate-report-btn');
+      const printBtn = document.getElementById('print-report-btn');
+      const exportCsvBtn = document.getElementById('export-csv-btn');
+      const exportAllBtn = document.getElementById('export-all-students-csv-btn');
+      const mountEl = document.getElementById('report-render-mount');
+
+      const queryStudentId = window.Helpers.getQueryParam('studentId') || '';
+
+      async function loadStudentsList() {
+        try {
+          allStudents = await window.API.getStudents();
+          studentSelect.innerHTML = `<option value="">-- Choose a Student (${allStudents.length} registered) --</option>` +
+            allStudents.map(function(s) {
+              return `<option value="${esc(s.Student_ID)}">${esc(s.Full_Name)} (${esc(s.Student_Code)}) — ${Number(s.Overall_Performance || 0)}%</option>`;
+            }).join('');
+
+          if (queryStudentId) {
+            studentSelect.value = queryStudentId;
+            await generateReportFor(queryStudentId);
+          }
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      }
+
+      async function generateReportFor(studentId) {
+        if (!studentId) {
+          window.Helpers.showToast('Please select a student first.', 'warning');
+          return;
+        }
+        mountEl.innerHTML = `
+          <div class="card">
+            <div class="loading-state">
+              <span class="spinner"></span>
+              <p class="mt-2">Generating official 12-section academic performance report...</p>
+            </div>
+          </div>
+        `;
+        try {
+          currentReportData = await window.API.generateStudentReport({ studentId: studentId });
+          window.ReportsUI.renderPrintableReport(mountEl, currentReportData);
+          printBtn.disabled = false;
+          exportCsvBtn.disabled = false;
+        } catch (err) {
+          mountEl.innerHTML = `<div class="card"><div class="empty-state"><p class="text-danger">${esc(err.message)}</p></div></div>`;
+        }
+      }
+
+      generateBtn.addEventListener('click', function() {
+        generateReportFor(studentSelect.value);
+      });
+
+      studentSelect.addEventListener('change', function() {
+        if (studentSelect.value) {
+          generateReportFor(studentSelect.value);
+        }
+      });
+
+      printBtn.addEventListener('click', function() {
+        window.ReportsUI.printReport();
+      });
+
+      exportCsvBtn.addEventListener('click', function() {
+        if (currentReportData) {
+          window.ReportsUI.exportStudentReportCsv(currentReportData);
+        }
+      });
+
+      exportAllBtn.addEventListener('click', function() {
+        if (!allStudents || allStudents.length === 0) {
+          window.Helpers.showToast('No student records to export.', 'warning');
+          return;
+        }
+        const headers = [
+          'Student ID', 'Full Name', 'Student Code', 'Phone', 'Account Status',
+          'Assigned Levels', 'Overall Performance (%)', 'Exam Average (%)', 'Task Average (%)',
+          'Completed Exams', 'Completed Tasks', 'Completed Lessons', 'Registration Date'
+        ];
+        const rows = allStudents.map(function(s) {
+          const sum = s.Performance_Summary || {};
+          return [
+            s.Student_ID,
+            s.Full_Name,
+            s.Student_Code,
+            s.Phone,
+            s.Account_Status,
+            (s.Assigned_Levels || []).map(function(l) { return l.Level_Name; }).join('; '),
+            s.Overall_Performance || 0,
+            sum.examAverage || 0,
+            sum.taskAverage || 0,
+            sum.completedExams || 0,
+            sum.completedTasks || 0,
+            sum.completedLessons || 0,
+            s.Created_At
+          ];
+        });
+        window.Helpers.downloadCsvFile('All_Students_Performance_Summary.csv', headers, rows);
+      });
+
+      window.onBackendConnected = loadStudentsList;
+      loadStudentsList();
+    })();
+  </script>
+</body>
+</html>

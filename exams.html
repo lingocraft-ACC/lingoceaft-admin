@@ -1,0 +1,874 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exams Management — Lingo Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link active"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Exams">Exams Management</h1>
+            <p>Build Drive-backed JSON examinations across 8 question types, manage settings, and review student attempts</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <a href="templates/exam_template.json" download="exam_template.json" class="btn btn-secondary btn-sm" title="Download Exam Starter JSON Template">
+            <i class="fa-solid fa-download text-primary"></i> Exam JSON Template
+          </a>
+          <button type="button" class="btn btn-primary" id="open-create-exam-btn">
+            <i class="fa-solid fa-plus"></i> Create New Exam
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Search & Filter Toolbar -->
+        <div class="card mb-4">
+          <div class="card-body" style="padding:1.15rem 1.4rem;">
+            <div class="toolbar" style="margin-bottom:0;">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="exam-search-input" class="form-control" placeholder="Search exams by title or Exam ID...">
+              </div>
+              <div class="filter-group">
+                <select id="filter-exam-level" class="form-select" style="width:auto;min-width:180px;">
+                  <option value="">All Levels</option>
+                </select>
+                <select id="filter-exam-status" class="form-select" style="width:auto;min-width:150px;">
+                  <option value="">All Statuses</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exams List Table -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Exam Title &amp; ID</th>
+                  <th>Level / Lesson</th>
+                  <th>Settings</th>
+                  <th>Drive JSON ID</th>
+                  <th>Attempts / Avg</th>
+                  <th>Availability</th>
+                  <th>Status</th>
+                  <th style="text-align:end;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="exams-tbody">
+                <tr>
+                  <td colspan="8" class="loading-state">
+                    <span class="spinner"></span>
+                    <p class="mt-2">Loading exams from Google Sheets &amp; Drive...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Create / Edit Exam Modal with Rich Visual Question Editor -->
+  <div class="modal-backdrop" id="exam-editor-modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exam-modal-title"><i class="fa-solid fa-file-signature text-primary"></i> Create New Exam</h3>
+        <div class="d-flex align-center gap-2">
+          <label class="btn btn-outline-primary btn-sm" style="cursor:pointer;">
+            <i class="fa-solid fa-file-import"></i> Import Exam JSON
+            <input type="file" id="import-exam-json-input" class="d-none" accept=".json,application/json">
+          </label>
+          <button type="button" class="btn btn-secondary btn-sm" id="export-current-exam-json-btn" title="Download current exam as JSON">
+            <i class="fa-solid fa-file-export"></i> Export JSON
+          </button>
+          <button type="button" class="modal-close" data-close-exam-modal>&times;</button>
+        </div>
+      </div>
+
+      <form id="exam-form" novalidate style="display:flex;flex-direction:column;flex:1;min-height:0;">
+        <div class="modal-body">
+          <input type="hidden" id="exam-id-field">
+          <div id="exam-json-validation-box" class="d-none" style="padding:0.9rem 1.1rem;border-radius:8px;margin-bottom:1rem;font-size:0.86rem;"></div>
+
+          <!-- Step 1: Level & Lesson Association -->
+          <div class="card mb-4" style="background:var(--bg-body);">
+            <div class="card-body" style="padding:1.15rem;">
+              <h4 class="font-bold mb-3" style="font-size:0.95rem;"><i class="fa-solid fa-sitemap text-primary"></i> 1. Level Association &amp; Exam Identity</h4>
+              <div class="form-row-3">
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-level-select">Select Level First <span class="required">*</span></label>
+                  <select id="exam-level-select" class="form-select" required>
+                    <option value="">-- Select Level --</option>
+                  </select>
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-lesson-select">Associate Lesson (Optional)</label>
+                  <select id="exam-lesson-select" class="form-select" disabled>
+                    <option value="">-- General Level Exam (No Specific Lesson) --</option>
+                  </select>
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-title-input">Exam Title <span class="required">*</span></label>
+                  <input type="text" id="exam-title-input" class="form-control" placeholder="e.g. Level 1 Midterm Examination" required disabled>
+                </div>
+              </div>
+
+              <div class="form-row mt-3">
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-desc-input">Exam Description</label>
+                  <input type="text" id="exam-desc-input" class="form-control" placeholder="Brief overview of the exam...">
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-instructions-input">Student Instructions</label>
+                  <input type="text" id="exam-instructions-input" class="form-control" value="Read every question carefully before submitting your answers.">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Exam Configuration & Security Settings -->
+          <div class="card mb-4" style="background:var(--bg-body);">
+            <div class="card-body" style="padding:1.15rem;">
+              <h4 class="font-bold mb-3" style="font-size:0.95rem;"><i class="fa-solid fa-sliders text-primary"></i> 2. Exam Timing, Scoring &amp; Availability Settings</h4>
+              <div class="form-row-3">
+                <div class="form-group">
+                  <label class="form-label" for="exam-duration-input">Duration (Minutes) <span class="required">*</span></label>
+                  <input type="number" id="exam-duration-input" class="form-control" min="1" max="360" value="30" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="exam-passing-input">Passing Score (%) <span class="required">*</span></label>
+                  <input type="number" id="exam-passing-input" class="form-control" min="1" max="100" value="50" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="exam-attempts-input">Maximum Attempts <span class="required">*</span></label>
+                  <input type="number" id="exam-attempts-input" class="form-control" min="1" max="20" value="2" required>
+                </div>
+              </div>
+
+              <div class="form-row-3">
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-start-date">Available From (Optional)</label>
+                  <input type="datetime-local" id="exam-start-date" class="form-control">
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-end-date">Available Until (Optional)</label>
+                  <input type="datetime-local" id="exam-end-date" class="form-control">
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label" for="exam-status-select">Exam Status</label>
+                  <select id="exam-status-select" class="form-select">
+                    <option value="ACTIVE">ACTIVE (Published)</option>
+                    <option value="INACTIVE">INACTIVE (Draft / Hidden)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap gap-4 mt-3 pt-2" style="border-top:1px solid var(--border-color);">
+                <label class="checkbox-chip">
+                  <input type="checkbox" id="exam-random-questions">
+                  <span><i class="fa-solid fa-shuffle"></i> Randomize Question Order</span>
+                </label>
+                <label class="checkbox-chip">
+                  <input type="checkbox" id="exam-random-options">
+                  <span><i class="fa-solid fa-random"></i> Randomize Answer Choices</span>
+                </label>
+                <label class="checkbox-chip selected">
+                  <input type="checkbox" id="exam-allow-review" checked>
+                  <span><i class="fa-solid fa-eye"></i> Allow Answer Review After Submission</span>
+                </label>
+                <label class="checkbox-chip selected">
+                  <input type="checkbox" id="exam-show-explanations" checked>
+                  <span><i class="fa-solid fa-lightbulb"></i> Show Explanations After Grading</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Rich Visual Question Editor -->
+          <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3">
+            <div>
+              <h4 class="font-bold" style="font-size:1.05rem;">
+                <i class="fa-solid fa-list-ol text-primary"></i> 3. Exam Questions Builder
+                <span class="badge badge-primary" id="exam-questions-count-badge">0 Questions</span>
+                <span class="badge badge-success" id="exam-total-marks-badge">Total Marks: 0</span>
+              </h4>
+              <p class="text-xs text-muted">Drag and drop cards or use Up/Down arrows to reorder questions. Media attachments are uploaded to Google Drive.</p>
+            </div>
+            <div class="d-flex align-center gap-2">
+              <select id="add-qtype-selector" class="form-select" style="width:auto;font-size:0.85rem;">
+                <option value="multiple_choice_single">+ Multiple Choice (Single)</option>
+                <option value="multiple_choice_multiple">+ Multiple Choice (Multiple)</option>
+                <option value="true_false">+ True / False</option>
+                <option value="short_answer">+ Short Answer</option>
+                <option value="fill_in_the_blanks">+ Fill in the Blanks</option>
+                <option value="matching">+ Matching Pairs</option>
+                <option value="ordering">+ Ordering Sequence</option>
+                <option value="essay">+ Essay Question</option>
+              </select>
+              <button type="button" class="btn btn-primary btn-sm" id="add-exam-question-btn">
+                <i class="fa-solid fa-plus"></i> Add Question
+              </button>
+            </div>
+          </div>
+
+          <div id="exam-question-editor-mount"></div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <div class="text-xs text-muted">
+            <i class="fa-brands fa-google-drive text-primary"></i> Saved as an individual JSON file in <code>Examination_Platform/Levels/.../Exams/</code>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" data-close-exam-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary" id="save-exam-submit-btn">
+              <i class="fa-solid fa-floppy-disk"></i> Save Exam to Drive &amp; Sheets
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Exam Attempts & Manual Grading Modal -->
+  <div class="modal-backdrop" id="exam-attempts-modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exam-attempts-modal-title"><i class="fa-solid fa-clipboard-user text-primary"></i> Student Exam Attempts</h3>
+        <button type="button" class="modal-close" data-close-attempts-modal>&times;</button>
+      </div>
+      <div class="modal-body" id="exam-attempts-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-attempts-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/validation.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allLevels = [];
+      let allLessons = [];
+      let allExams = [];
+
+      const tbody = document.getElementById('exams-tbody');
+      const searchInput = document.getElementById('exam-search-input');
+      const levelFilter = document.getElementById('filter-exam-level');
+      const statusFilter = document.getElementById('filter-exam-status');
+
+      const examLevelSelect = document.getElementById('exam-level-select');
+      const examLessonSelect = document.getElementById('exam-lesson-select');
+      const examTitleInput = document.getElementById('exam-title-input');
+
+      const qEditor = window.Helpers.createQuestionEditor(
+        document.getElementById('exam-question-editor-mount'),
+        {
+          onChange: function(qList, totalPts) {
+            document.getElementById('exam-questions-count-badge').textContent = qList.length + ' Questions';
+            document.getElementById('exam-total-marks-badge').textContent = 'Total Marks: ' + totalPts;
+          }
+        }
+      );
+
+      document.getElementById('add-exam-question-btn').addEventListener('click', function() {
+        const type = document.getElementById('add-qtype-selector').value;
+        qEditor.addQuestion(type);
+      });
+
+      const qParamLevel = window.Helpers.getQueryParam('levelId') || '';
+      const qParamLesson = window.Helpers.getQueryParam('lessonId') || '';
+
+      async function loadData() {
+        try {
+          const res = await Promise.all([
+            window.API.getLevels({}, { skipCache: true }),
+            window.API.getLessons(),
+            window.API.getExams()
+          ]);
+          allLevels = res[0] || [];
+          allLessons = res[1] || [];
+          allExams = res[2] || [];
+
+          populateDropdowns();
+          if (qParamLevel && !levelFilter.value) levelFilter.value = qParamLevel;
+          renderTable();
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><p class="text-danger">${esc(err.message)}</p></td></tr>`;
+        }
+      }
+
+      function populateDropdowns() {
+        const curFilter = levelFilter.value;
+        levelFilter.innerHTML = `<option value="">All Levels</option>` + allLevels.map(function(l) {
+          return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)}</option>`;
+        }).join('');
+        levelFilter.value = curFilter;
+
+        examLevelSelect.innerHTML = `<option value="">-- Select Level --</option>` + allLevels.map(function(l) {
+          return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)} (${esc(l.Level_ID)})</option>`;
+        }).join('');
+      }
+
+      function populateLessonsForLevel(levelId, selectedLessonId) {
+        if (!levelId) {
+          examLessonSelect.innerHTML = `<option value="">-- General Level Exam (No Specific Lesson) --</option>`;
+          examLessonSelect.disabled = true;
+          examTitleInput.disabled = true;
+          return;
+        }
+        examLessonSelect.disabled = false;
+        examTitleInput.disabled = false;
+        const levelLessons = allLessons.filter(function(les) {
+          return String(les.Level_ID) === String(levelId);
+        });
+        examLessonSelect.innerHTML = `<option value="">-- General Level Exam (No Specific Lesson) --</option>` +
+          levelLessons.map(function(les) {
+            return `<option value="${esc(les.Lesson_ID)}">${esc(les.Lesson_Title)}</option>`;
+          }).join('');
+        if (selectedLessonId) {
+          examLessonSelect.value = selectedLessonId;
+        }
+      }
+
+      examLevelSelect.addEventListener('change', function() {
+        populateLessonsForLevel(examLevelSelect.value, '');
+      });
+
+      function renderTable() {
+        const q = searchInput.value.trim().toLowerCase();
+        const lvl = levelFilter.value;
+        const st = statusFilter.value;
+
+        const filtered = allExams.filter(function(ex) {
+          if (q) {
+            const mTitle = String(ex.Exam_Title || '').toLowerCase().indexOf(q) !== -1;
+            const mId = String(ex.Exam_ID || '').toLowerCase().indexOf(q) !== -1;
+            if (!mTitle && !mId) return false;
+          }
+          if (lvl && String(ex.Level_ID) !== lvl) return false;
+          if (st && String(ex.Status).toUpperCase() !== st) return false;
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-state-icon"><i class="fa-solid fa-file-signature"></i></div>
+                <h3>No Exams Found</h3>
+                <p>Click "Create New Exam" or import an Exam JSON file to build an examination.</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(function(ex) {
+          return `
+            <tr>
+              <td>
+                <div class="font-bold">${esc(ex.Exam_Title)}</div>
+                <code class="text-xs text-muted">${esc(ex.Exam_ID)}</code>
+              </td>
+              <td>
+                <span class="badge badge-primary">${esc(ex.Level_Name || ex.Level_ID)}</span>
+                ${ex.Lesson_Title ? `<div class="text-xs text-muted mt-1"><i class="fa-solid fa-book-open"></i> ${esc(ex.Lesson_Title)}</div>` : ''}
+              </td>
+              <td class="text-xs">
+                <div><strong>Marks:</strong> ${ex.Total_Marks} &bull; <strong>Pass:</strong> ${ex.Passing_Score}%</div>
+                <div><strong>Duration:</strong> ${ex.Duration}m &bull; <strong>Max Attempts:</strong> ${ex.Max_Attempts}</div>
+              </td>
+              <td>
+                <code class="text-xs" style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;" title="Google Drive File ID">${esc((ex.JSON_File_ID || '').substring(0, 14))}...</code>
+              </td>
+              <td>
+                <div class="font-semibold">${Number(ex.Total_Attempts_Count || 0)} Attempts</div>
+                <div class="text-xs text-muted">Avg: ${Number(ex.Average_Percentage || 0)}%</div>
+              </td>
+              <td class="text-xs">
+                <span class="badge ${ex.Availability_Reason === 'AVAILABLE' ? 'badge-success' : 'badge-warning'}">${esc(ex.Availability_Reason || 'AVAILABLE')}</span>
+              </td>
+              <td>${window.Helpers.renderStatusBadge(ex.Status)}</td>
+              <td style="text-align:end;white-space:nowrap;">
+                <button type="button" class="btn btn-secondary btn-sm" data-act="attempts" data-id="${esc(ex.Exam_ID)}" title="View & Grade Student Attempts">
+                  <i class="fa-solid fa-clipboard-check text-primary"></i> Attempts (${Number(ex.Total_Attempts_Count || 0)})
+                </button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="edit" data-id="${esc(ex.Exam_ID)}" title="Edit Exam & Questions"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button type="button" class="btn btn-icon btn-outline-danger btn-sm" data-act="delete" data-id="${esc(ex.Exam_ID)}" title="Delete Exam"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('[data-act]').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            const act = btn.getAttribute('data-act');
+            const id = btn.getAttribute('data-id');
+            if (act === 'edit') {
+              await openEditExamModal(id);
+            } else if (act === 'attempts') {
+              await openAttemptsModal(id);
+            } else if (act === 'delete') {
+              const ex = allExams.find(function(x) { return x.Exam_ID === id; });
+              const ok = await window.Helpers.confirmDialog({
+                title: 'Delete Exam & Drive JSON',
+                message: 'Are you sure you want to delete "' + (ex ? ex.Exam_Title : id) + '" and move its Google Drive JSON file to trash?',
+                confirmText: 'Delete Exam',
+                danger: true
+              });
+              if (ok) {
+                try {
+                  await window.API.deleteExam({ examId: id });
+                  window.Helpers.showToast('Exam deleted.', 'success');
+                  await loadData();
+                } catch (err) {
+                  window.Helpers.showToast(err.message, 'error');
+                }
+              }
+            }
+          });
+        });
+      }
+
+      const editorModal = document.getElementById('exam-editor-modal');
+      const examForm = document.getElementById('exam-form');
+      const valBox = document.getElementById('exam-json-validation-box');
+
+      document.getElementById('open-create-exam-btn').addEventListener('click', function() {
+        document.getElementById('exam-modal-title').innerHTML = '<i class="fa-solid fa-file-signature text-primary"></i> Create New Exam';
+        document.getElementById('exam-id-field').value = '';
+        examForm.reset();
+        valBox.classList.add('d-none');
+
+        const initialLevel = levelFilter.value || qParamLevel || '';
+        examLevelSelect.value = initialLevel;
+        populateLessonsForLevel(initialLevel, qParamLesson);
+
+        qEditor.setQuestions([]);
+        qEditor.addQuestion('multiple_choice_single');
+        editorModal.classList.add('active');
+      });
+
+      async function openEditExamModal(examId) {
+        try {
+          window.Helpers.showToast('Loading exam JSON from Google Drive...', 'info', 1800);
+          const fullExam = await window.API.getExamById({ examId: examId });
+          const ej = fullExam.examJson || {};
+          const settings = ej.settings || {};
+
+          document.getElementById('exam-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Exam (' + esc(fullExam.Exam_ID) + ' — v' + (ej.exam_version || 1) + ')';
+          document.getElementById('exam-id-field').value = fullExam.Exam_ID;
+          valBox.classList.add('d-none');
+
+          examLevelSelect.value = fullExam.Level_ID;
+          populateLessonsForLevel(fullExam.Level_ID, fullExam.Lesson_ID);
+          examTitleInput.value = fullExam.Exam_Title || ej.title || '';
+          document.getElementById('exam-desc-input').value = ej.description || '';
+          document.getElementById('exam-instructions-input').value = ej.instructions || '';
+
+          document.getElementById('exam-duration-input').value = Number(fullExam.Duration || settings.duration_minutes || 30);
+          document.getElementById('exam-passing-input').value = Number(fullExam.Passing_Score || settings.passing_score || 50);
+          document.getElementById('exam-attempts-input').value = Number(fullExam.Max_Attempts || settings.max_attempts || 2);
+          document.getElementById('exam-start-date').value = fullExam.Start_Date ? String(fullExam.Start_Date).substring(0, 16) : '';
+          document.getElementById('exam-end-date').value = fullExam.End_Date ? String(fullExam.End_Date).substring(0, 16) : '';
+          document.getElementById('exam-status-select').value = fullExam.Status || 'ACTIVE';
+
+          document.getElementById('exam-random-questions').checked = Boolean(settings.random_questions);
+          document.getElementById('exam-random-options').checked = Boolean(settings.random_options);
+          document.getElementById('exam-allow-review').checked = settings.allow_review !== false;
+          document.getElementById('exam-show-explanations').checked = settings.show_explanations !== false;
+
+          qEditor.setQuestions(ej.questions || []);
+          editorModal.classList.add('active');
+        } catch (err) {
+          window.Helpers.showToast('Failed to load exam: ' + err.message, 'error');
+        }
+      }
+
+      document.querySelectorAll('[data-close-exam-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { editorModal.classList.remove('active'); });
+      });
+
+      // Import Exam JSON File with Validation & Preview
+      document.getElementById('import-exam-json-input').addEventListener('change', function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const check = window.Validation.validateAssessmentJson(evt.target.result, 'exam', {
+            availableLevels: allLevels,
+            availableLessons: allLessons
+          });
+
+          valBox.classList.remove('d-none');
+          if (!check.valid) {
+            valBox.style.background = '#fee2e2';
+            valBox.style.color = '#991b1b';
+            valBox.innerHTML = `<strong><i class="fa-solid fa-circle-xmark"></i> Invalid Exam JSON File:</strong><br>` +
+              check.errors.map(function(err) { return '&bull; ' + esc(err); }).join('<br>');
+            e.target.value = '';
+            return;
+          }
+
+          const obj = check.parsed;
+          const settings = obj.settings || {};
+
+          if (obj.level_id && allLevels.some(function(l) { return l.Level_ID === obj.level_id; })) {
+            examLevelSelect.value = obj.level_id;
+            populateLessonsForLevel(obj.level_id, obj.lesson_id || '');
+          } else if (examLevelSelect.value) {
+            populateLessonsForLevel(examLevelSelect.value, '');
+          }
+
+          examTitleInput.disabled = false;
+          examTitleInput.value = obj.title || '';
+          document.getElementById('exam-desc-input').value = obj.description || '';
+          document.getElementById('exam-instructions-input').value = obj.instructions || '';
+          if (settings.duration_minutes) document.getElementById('exam-duration-input').value = settings.duration_minutes;
+          if (settings.passing_score) document.getElementById('exam-passing-input').value = settings.passing_score;
+          if (settings.max_attempts) document.getElementById('exam-attempts-input').value = settings.max_attempts;
+          document.getElementById('exam-random-questions').checked = Boolean(settings.random_questions);
+          document.getElementById('exam-random-options').checked = Boolean(settings.random_options);
+
+          qEditor.setQuestions(obj.questions || []);
+
+          valBox.style.background = '#d1fae5';
+          valBox.style.color = '#065f46';
+          valBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <strong>JSON Validated &amp; Loaded into Visual Editor!</strong> (${obj.questions.length} questions, ${check.calculatedTotalMarks} total marks).` +
+            (check.warnings.length > 0 ? '<br><span style="color:#92400e;">Note: ' + check.warnings.map(esc).join(' | ') + '</span>' : '');
+          e.target.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      // Export Current Exam as JSON
+      document.getElementById('export-current-exam-json-btn').addEventListener('click', function() {
+        const examId = document.getElementById('exam-id-field').value || 'EXAM_L001_001';
+        const qList = qEditor.getQuestions();
+        const totalMarks = qEditor.getTotalPoints();
+        const jsonObj = {
+          schema_version: '1.0',
+          type: 'exam',
+          exam_id: examId,
+          title: examTitleInput.value.trim() || 'Sample Exam',
+          level_id: examLevelSelect.value || 'LEVEL_001',
+          lesson_id: examLessonSelect.value || '',
+          description: document.getElementById('exam-desc-input').value.trim(),
+          instructions: document.getElementById('exam-instructions-input').value.trim(),
+          settings: {
+            duration_minutes: Number(document.getElementById('exam-duration-input').value || 30),
+            total_marks: totalMarks,
+            passing_score: Number(document.getElementById('exam-passing-input').value || 50),
+            max_attempts: Number(document.getElementById('exam-attempts-input').value || 2),
+            random_questions: document.getElementById('exam-random-questions').checked,
+            random_options: document.getElementById('exam-random-options').checked
+          },
+          questions: qList
+        };
+        window.Helpers.downloadJsonFile(examId + '.json', jsonObj);
+      });
+
+      // Submit Exam Form (Create or Update in Google Drive & Sheets)
+      examForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const examId = document.getElementById('exam-id-field').value.trim();
+        const levelId = examLevelSelect.value;
+        const lessonId = examLessonSelect.value;
+        const title = examTitleInput.value.trim();
+        const questions = qEditor.getQuestions();
+        const totalMarks = qEditor.getTotalPoints();
+
+        if (!levelId) {
+          window.Helpers.showToast('Please select a Level before saving the exam.', 'error');
+          return;
+        }
+        if (!title) {
+          window.Helpers.showToast('Exam Title is required.', 'error');
+          return;
+        }
+        if (questions.length === 0) {
+          window.Helpers.showToast('Please add at least one question to the exam.', 'error');
+          return;
+        }
+
+        const candidateJson = {
+          schema_version: '1.0',
+          type: 'exam',
+          title: title,
+          level_id: levelId,
+          lesson_id: lessonId,
+          description: document.getElementById('exam-desc-input').value.trim(),
+          instructions: document.getElementById('exam-instructions-input').value.trim(),
+          settings: {
+            duration_minutes: Number(document.getElementById('exam-duration-input').value || 30),
+            total_marks: totalMarks,
+            passing_score: Number(document.getElementById('exam-passing-input').value || 50),
+            max_attempts: Number(document.getElementById('exam-attempts-input').value || 2),
+            random_questions: document.getElementById('exam-random-questions').checked,
+            random_options: document.getElementById('exam-random-options').checked,
+            allow_review: document.getElementById('exam-allow-review').checked,
+            show_explanations: document.getElementById('exam-show-explanations').checked
+          },
+          questions: questions
+        };
+
+        const check = window.Validation.validateAssessmentJson(candidateJson, 'exam');
+        if (!check.valid) {
+          valBox.classList.remove('d-none');
+          valBox.style.background = '#fee2e2';
+          valBox.style.color = '#991b1b';
+          valBox.innerHTML = check.errors.map(function(err) { return '<div>&bull; ' + esc(err) + '</div>'; }).join('');
+          return;
+        }
+
+        const payload = {
+          examId: examId,
+          levelId: levelId,
+          lessonId: lessonId,
+          examTitle: title,
+          description: candidateJson.description,
+          instructions: candidateJson.instructions,
+          duration: candidateJson.settings.duration_minutes,
+          totalMarks: totalMarks,
+          passingScore: candidateJson.settings.passing_score,
+          maxAttempts: candidateJson.settings.max_attempts,
+          randomQuestions: candidateJson.settings.random_questions,
+          randomOptions: candidateJson.settings.random_options,
+          allowReview: candidateJson.settings.allow_review,
+          showExplanations: candidateJson.settings.show_explanations,
+          startDate: document.getElementById('exam-start-date').value,
+          endDate: document.getElementById('exam-end-date').value,
+          status: document.getElementById('exam-status-select').value,
+          questions: questions
+        };
+
+        const saveBtn = document.getElementById('save-exam-submit-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner spinner-sm spinner-white"></span> Saving to Drive...';
+
+        try {
+          if (examId) {
+            await window.API.updateExam(payload);
+            window.Helpers.showToast('Exam JSON updated in Google Drive & Sheets.', 'success');
+          } else {
+            await window.API.createExam(payload);
+            window.Helpers.showToast('New Exam JSON created in Google Drive & Sheets.', 'success');
+          }
+          editorModal.classList.remove('active');
+          await loadData();
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Exam to Drive & Sheets';
+        }
+      });
+
+      // Student Attempts & Manual Grading Modal
+      const attemptsModal = document.getElementById('exam-attempts-modal');
+      const attemptsBody = document.getElementById('exam-attempts-modal-body');
+      document.querySelectorAll('[data-close-attempts-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { attemptsModal.classList.remove('active'); });
+      });
+
+      async function openAttemptsModal(examId) {
+        attemptsBody.innerHTML = `<div class="loading-state"><span class="spinner"></span><p class="mt-2">Loading student attempts...</p></div>`;
+        attemptsModal.classList.add('active');
+        try {
+          const attempts = await window.API.getExamResults({ examId: examId });
+          if (!attempts || attempts.length === 0) {
+            attemptsBody.innerHTML = `<div class="empty-state"><p>No student attempts submitted for this exam yet.</p></div>`;
+            return;
+          }
+
+          attemptsBody.innerHTML = `
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Attempt #</th>
+                    <th>Exam Version</th>
+                    <th>Submitted At</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Result</th>
+                    <th>Grading</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${attempts.map(function(att) {
+                    return `
+                      <tr>
+                        <td><strong>${esc(att.Student_Name)}</strong><br><code class="text-xs">${esc(att.Student_Code)}</code></td>
+                        <td>#${att.Attempt_Number}</td>
+                        <td>v${esc(att.Exam_Version || '1')}</td>
+                        <td>${window.Helpers.formatDateTime(att.Submit_Time)}</td>
+                        <td>${att.Score} / ${att.Total_Marks}</td>
+                        <td><strong>${att.Percentage}%</strong></td>
+                        <td>${window.Helpers.renderStatusBadge(att.Result_Status)}</td>
+                        <td>${window.Helpers.renderStatusBadge(att.Grading_Status)}</td>
+                        <td>
+                          <button type="button" class="btn btn-primary btn-sm" data-inspect-attempt="${esc(att.Attempt_ID)}">
+                            <i class="fa-solid fa-magnifying-glass"></i> Review / Grade
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+            <div id="attempt-review-detail-pane" class="mt-4"></div>
+          `;
+
+          attemptsBody.querySelectorAll('[data-inspect-attempt]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              inspectAttemptDetail(btn.getAttribute('data-inspect-attempt'), examId);
+            });
+          });
+        } catch (err) {
+          attemptsBody.innerHTML = `<p class="text-danger">${esc(err.message)}</p>`;
+        }
+      }
+
+      async function inspectAttemptDetail(attemptId, examId) {
+        const pane = document.getElementById('attempt-review-detail-pane');
+        if (!pane) return;
+        pane.innerHTML = `<div class="loading-state"><span class="spinner"></span></div>`;
+        try {
+          const detail = await window.API.getExamResults({ attemptId: attemptId });
+          const breakdown = (detail.Details && detail.Details.breakdown) || [];
+
+          pane.innerHTML = `
+            <div class="card" style="border:2px solid var(--primary);">
+              <div class="card-header">
+                <h4 class="card-title">Attempt Breakdown — ${esc(detail.Student_Name)} (Historical Exam Version v${esc(detail.Exam_Version || '1')})</h4>
+              </div>
+              <div class="card-body">
+                ${breakdown.map(function(item, idx) {
+                  return `
+                    <div style="padding:0.9rem;border:1px solid var(--border-color);border-radius:8px;margin-bottom:0.75rem;background:var(--bg-body);">
+                      <div class="d-flex justify-between align-center mb-1">
+                        <strong>Q${idx + 1}: ${esc(item.text)} (${esc(item.type)})</strong>
+                        <div class="d-flex align-center gap-2">
+                          <label class="text-xs font-bold">Awarded Points (Max ${item.points}):</label>
+                          <input type="number" step="0.5" min="0" max="${item.points}" value="${item.earned_points}" class="form-control" style="width:85px;padding:4px 8px;" data-manual-qgrade="${esc(item.question_id)}">
+                        </div>
+                      </div>
+                      <div class="text-sm"><strong>Student Answer:</strong> <code>${esc(JSON.stringify(item.student_answer))}</code></div>
+                      <div class="text-sm text-muted"><strong>Historical Correct Key:</strong> <code>${esc(JSON.stringify(item.correct_answer))}</code></div>
+                    </div>
+                  `;
+                }).join('')}
+                <div class="form-group mt-3">
+                  <label class="form-label">Instructor Feedback</label>
+                  <input type="text" id="manual-exam-feedback" class="form-control" value="${esc((detail.Details && detail.Details.teacher_feedback) || '')}" placeholder="Optional teacher comment...">
+                </div>
+                <button type="button" class="btn btn-success" id="save-manual-exam-grade-btn">
+                  <i class="fa-solid fa-check"></i> Save Updated Grades
+                </button>
+              </div>
+            </div>
+          `;
+
+          document.getElementById('save-manual-exam-grade-btn').addEventListener('click', async function() {
+            const questionGrades = {};
+            pane.querySelectorAll('[data-manual-qgrade]').forEach(function(inp) {
+              questionGrades[inp.getAttribute('data-manual-qgrade')] = { points: Number(inp.value) };
+            });
+            try {
+              await window.API.gradeExam({
+                attemptId: attemptId,
+                questionGrades: questionGrades,
+                feedback: document.getElementById('manual-exam-feedback').value
+              });
+              window.Helpers.showToast('Exam attempt grades updated!', 'success');
+              await openAttemptsModal(examId);
+              await loadData();
+            } catch (err) {
+              window.Helpers.showToast(err.message, 'error');
+            }
+          });
+        } catch (err) {
+          pane.innerHTML = `<p class="text-danger">${esc(err.message)}</p>`;
+        }
+      }
+
+      searchInput.addEventListener('input', renderTable);
+      levelFilter.addEventListener('change', renderTable);
+      statusFilter.addEventListener('change', renderTable);
+
+      window.onBackendConnected = loadData;
+      loadData();
+    })();
+  </script>
+</body>
+</html>

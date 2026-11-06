@@ -1,0 +1,649 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Management — Lingo Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link active"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Students">Student Management</h1>
+            <p>Create accounts, assign multiple educational levels, manage credentials, and monitor performance</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="api-status-pill">
+            <span class="api-status-dot"></span>
+            <span class="api-status-label">GAS Backend</span>
+          </div>
+          <button type="button" class="btn btn-primary" id="open-add-student-btn">
+            <i class="fa-solid fa-user-plus"></i> Add New Student
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Search, Filter & Sorting Toolbar -->
+        <div class="card mb-4">
+          <div class="card-body" style="padding:1.15rem 1.4rem;">
+            <div class="toolbar" style="margin-bottom:0;">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="student-search-input" class="form-control" placeholder="Search by student full name, student code, or phone...">
+              </div>
+
+              <div class="filter-group">
+                <select id="filter-level-select" class="form-select" style="width:auto;min-width:170px;">
+                  <option value="">All Levels</option>
+                </select>
+
+                <select id="filter-status-select" class="form-select" style="width:auto;min-width:150px;">
+                  <option value="">All Account Status</option>
+                  <option value="ACTIVE">Active Only</option>
+                  <option value="INACTIVE">Inactive Only</option>
+                </select>
+
+                <select id="sort-students-select" class="form-select" style="width:auto;min-width:175px;">
+                  <option value="date_desc">Newest Registered</option>
+                  <option value="date_asc">Oldest Registered</option>
+                  <option value="name_asc">Name (A &rarr; Z)</option>
+                  <option value="name_desc">Name (Z &rarr; A)</option>
+                  <option value="perf_desc">Highest Performance</option>
+                  <option value="perf_asc">Lowest Performance</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Students Table Card -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Avatar</th>
+                  <th>Full Name</th>
+                  <th>Student Code</th>
+                  <th>Phone Number</th>
+                  <th>Assigned Levels</th>
+                  <th>Overall Performance</th>
+                  <th>Account Status</th>
+                  <th>Registration Date</th>
+                  <th style="text-align:end;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <tr>
+                  <td colspan="9" class="loading-state">
+                    <span class="spinner"></span>
+                    <p class="mt-2">Loading students from Google Sheets...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="students-pagination"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add / Edit Student Modal -->
+  <div class="modal-backdrop" id="student-form-modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="student-modal-title"><i class="fa-solid fa-user-plus text-primary"></i> Add New Student</h3>
+        <button type="button" class="modal-close" data-close-student-modal>&times;</button>
+      </div>
+      <form id="student-form" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="stu-id-field">
+          <div id="stu-form-errors" class="d-none" style="background:var(--danger-light);color:#991b1b;padding:0.85rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.86rem;"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="stu-fullname">Full Name (Three-Part Name) <span class="required">*</span></label>
+              <input type="text" id="stu-fullname" class="form-control" placeholder="e.g. Omar Khaled Hassan" required>
+              <span class="form-hint">Enter the student's First, Middle, and Last name.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="stu-phone">Phone Number <span class="text-muted text-xs">(Optional)</span></label>
+              <input type="tel" id="stu-phone" class="form-control" placeholder="e.g. +20 100 123 4567">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="stu-code">Student Code (Unique Login ID) <span class="required">*</span></label>
+              <div class="d-flex gap-2">
+                <input type="text" id="stu-code" class="form-control" placeholder="e.g. STU-2026-001" required style="font-family:monospace;">
+                <button type="button" class="btn btn-secondary btn-sm" id="generate-code-btn" title="Generate Unique Code">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Auto
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group" id="stu-password-group">
+              <label class="form-label" for="stu-password">Login Password <span class="required">*</span></label>
+              <input type="text" id="stu-password" class="form-control" placeholder="Minimum 4 characters">
+              <span class="form-hint">Stored securely using salted SHA-256 hashing.</span>
+            </div>
+
+            <div class="form-group d-none" id="stu-status-group">
+              <label class="form-label" for="stu-status">Account Status</label>
+              <select id="stu-status" class="form-select">
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group mb-0">
+            <label class="form-label">Assigned Educational Levels (Select one or multiple levels) <span class="required">*</span></label>
+            <div class="checkbox-chips" id="stu-levels-chips-container">
+              <span class="text-muted text-sm">Loading levels...</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-student-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-student-btn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Student Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div class="modal-backdrop" id="reset-pwd-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-key text-warning"></i> Reset Student Password</h3>
+        <button type="button" class="modal-close" data-close-pwd-modal>&times;</button>
+      </div>
+      <form id="reset-pwd-form">
+        <div class="modal-body">
+          <input type="hidden" id="reset-pwd-student-id">
+          <p class="text-sm text-secondary mb-3">Resetting password for: <strong id="reset-pwd-student-name"></strong></p>
+          <div class="form-group mb-0">
+            <label class="form-label" for="new-student-password">New Password <span class="required">*</span></label>
+            <input type="text" id="new-student-password" class="form-control" placeholder="Enter new password" required minlength="4">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-pwd-modal>Cancel</button>
+          <button type="submit" class="btn btn-warning" id="confirm-reset-pwd-btn">
+            <i class="fa-solid fa-check"></i> Update Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage Student Levels Modal -->
+  <div class="modal-backdrop" id="manage-levels-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-layer-group text-primary"></i> Manage Assigned Levels</h3>
+        <button type="button" class="modal-close" data-close-levels-modal>&times;</button>
+      </div>
+      <form id="manage-levels-form">
+        <div class="modal-body">
+          <input type="hidden" id="manage-levels-student-id">
+          <p class="text-sm text-secondary mb-3">Select one or more levels for <strong id="manage-levels-student-name"></strong>:</p>
+          <div class="checkbox-chips" id="manage-levels-chips"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-levels-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-levels-assignment-btn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Level Assignments
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/validation.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/reports.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allStudents = [];
+      let allLevels = [];
+      let currentPage = 1;
+      const pageSize = 10;
+
+      const tbody = document.getElementById('students-tbody');
+      const paginationEl = document.getElementById('students-pagination');
+      const searchInput = document.getElementById('student-search-input');
+      const levelFilter = document.getElementById('filter-level-select');
+      const statusFilter = document.getElementById('filter-status-select');
+      const sortSelect = document.getElementById('sort-students-select');
+
+      async function loadData() {
+        try {
+          const results = await Promise.all([
+            window.API.getStudents(),
+            window.API.getLevels({}, { skipCache: true })
+          ]);
+          allStudents = results[0] || [];
+          allLevels = results[1] || [];
+          populateLevelFilters();
+          renderTable();
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><p class="text-danger">${esc(err.message)}</p></td></tr>`;
+        }
+      }
+
+      function populateLevelFilters() {
+        const currentVal = levelFilter.value;
+        levelFilter.innerHTML = `<option value="">All Levels</option>` + allLevels.map(function(lvl) {
+          return `<option value="${esc(lvl.Level_ID)}">${esc(lvl.Level_Name)}</option>`;
+        }).join('');
+        levelFilter.value = currentVal;
+      }
+
+      function renderLevelCheckboxes(containerId, selectedIds) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const sel = (selectedIds || []).map(String);
+        if (allLevels.length === 0) {
+          container.innerHTML = `<span class="text-warning text-sm"><i class="fa-solid fa-triangle-exclamation"></i> No levels created yet. Please create a Level in Levels Management first.</span>`;
+          return;
+        }
+        container.innerHTML = allLevels.map(function(lvl) {
+          const checked = sel.indexOf(String(lvl.Level_ID)) !== -1;
+          return `
+            <label class="checkbox-chip ${checked ? 'selected' : ''}">
+              <input type="checkbox" value="${esc(lvl.Level_ID)}" ${checked ? 'checked' : ''}>
+              <span>${esc(lvl.Level_Name)}</span>
+            </label>
+          `;
+        }).join('');
+
+        container.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+          cb.addEventListener('change', function() {
+            cb.closest('.checkbox-chip').classList.toggle('selected', cb.checked);
+          });
+        });
+      }
+
+      function getFilteredAndSortedStudents() {
+        const q = searchInput.value.trim().toLowerCase();
+        const lvlId = levelFilter.value;
+        const st = statusFilter.value;
+        const sortBy = sortSelect.value;
+
+        let list = allStudents.filter(function(s) {
+          if (q) {
+            const matchName = String(s.Full_Name || '').toLowerCase().indexOf(q) !== -1;
+            const matchCode = String(s.Student_Code || '').toLowerCase().indexOf(q) !== -1;
+            const matchPhone = String(s.Phone || '').toLowerCase().indexOf(q) !== -1;
+            if (!matchName && !matchCode && !matchPhone) return false;
+          }
+          if (lvlId && (s.Assigned_Level_IDs || []).indexOf(lvlId) === -1) {
+            return false;
+          }
+          if (st && String(s.Account_Status).toUpperCase() !== st) {
+            return false;
+          }
+          return true;
+        });
+
+        list.sort(function(a, b) {
+          if (sortBy === 'name_asc') return String(a.Full_Name).localeCompare(String(b.Full_Name));
+          if (sortBy === 'name_desc') return String(b.Full_Name).localeCompare(String(a.Full_Name));
+          if (sortBy === 'perf_desc') return Number(b.Overall_Performance || 0) - Number(a.Overall_Performance || 0);
+          if (sortBy === 'perf_asc') return Number(a.Overall_Performance || 0) - Number(b.Overall_Performance || 0);
+          if (sortBy === 'date_asc') return String(a.Created_At).localeCompare(String(b.Created_At));
+          return String(b.Created_At).localeCompare(String(a.Created_At));
+        });
+
+        return list;
+      }
+
+      function renderTable() {
+        const filtered = getFilteredAndSortedStudents();
+        const total = filtered.length;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+        if (pageItems.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" class="empty-state">
+                <div class="empty-state-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <h3>No Student Records Found</h3>
+                <p>Click "Add New Student" to register a student account and assign their educational levels.</p>
+              </td>
+            </tr>
+          `;
+          window.Helpers.renderPagination(paginationEl, 0, 1, pageSize, function() {});
+          return;
+        }
+
+        tbody.innerHTML = pageItems.map(function(stu) {
+          const pct = Number(stu.Overall_Performance || 0);
+          const perfColor = window.Helpers.getPerformanceColor(pct);
+          const isActive = String(stu.Account_Status).toUpperCase() === 'ACTIVE';
+
+          const levelsBadges = (stu.Assigned_Levels || []).map(function(l) {
+            return `<span class="badge badge-primary" style="margin:2px;">${esc(l.Level_Name)}</span>`;
+          }).join('') || '<span class="text-xs text-muted">None</span>';
+
+          return `
+            <tr>
+              <td>
+                <div class="avatar">${esc(window.Helpers.getInitials(stu.Full_Name))}</div>
+              </td>
+              <td>
+                <div class="font-bold">${esc(stu.Full_Name)}</div>
+              </td>
+              <td>
+                <code style="background:var(--bg-muted);padding:0.2rem 0.5rem;border-radius:4px;font-weight:600;">${esc(stu.Student_Code)}</code>
+              </td>
+              <td>${esc(stu.Phone || '—')}</td>
+              <td style="max-width:220px;">${levelsBadges}</td>
+              <td style="min-width:140px;">
+                <div class="d-flex align-center gap-2">
+                  <div class="progress-bar-wrap" style="flex:1;">
+                    <div class="progress-bar-fill" style="width:${pct}%;background:${perfColor};"></div>
+                  </div>
+                  <strong class="text-xs" style="color:${perfColor};min-width:36px;">${pct}%</strong>
+                </div>
+              </td>
+              <td>${window.Helpers.renderStatusBadge(stu.Account_Status)}</td>
+              <td class="text-sm text-muted">${window.Helpers.formatDate(stu.Created_At)}</td>
+              <td style="text-align:end;white-space:nowrap;">
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="profile" data-id="${esc(stu.Student_ID)}" title="View Performance Profile"><i class="fa-solid fa-chart-pie text-primary"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="edit" data-id="${esc(stu.Student_ID)}" title="Edit Student"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="levels" data-id="${esc(stu.Student_ID)}" title="Manage Assigned Levels"><i class="fa-solid fa-layer-group text-info"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="pwd" data-id="${esc(stu.Student_ID)}" title="Reset Password"><i class="fa-solid fa-key text-warning"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="toggle-status" data-id="${esc(stu.Student_ID)}" title="${isActive ? 'Deactivate Account' : 'Activate Account'}">
+                  <i class="fa-solid ${isActive ? 'fa-user-slash text-danger' : 'fa-user-check text-success'}"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-outline-danger btn-sm" data-act="delete" data-id="${esc(stu.Student_ID)}" title="Delete Student"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        window.Helpers.renderPagination(paginationEl, total, currentPage, pageSize, function(newPage) {
+          currentPage = newPage;
+          renderTable();
+        });
+
+        bindRowActions();
+      }
+
+      function bindRowActions() {
+        tbody.querySelectorAll('[data-act]').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            const act = btn.getAttribute('data-act');
+            const id = btn.getAttribute('data-id');
+            const student = allStudents.find(function(s) { return s.Student_ID === id; });
+            if (!student) return;
+
+            if (act === 'profile') {
+              window.ReportsUI.openStudentProfileModal(id);
+            } else if (act === 'edit') {
+              openEditStudentModal(student);
+            } else if (act === 'levels') {
+              openManageLevelsModal(student);
+            } else if (act === 'pwd') {
+              openResetPwdModal(student);
+            } else if (act === 'toggle-status') {
+              const nextStatus = String(student.Account_Status).toUpperCase() === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+              const ok = await window.Helpers.confirmDialog({
+                title: nextStatus === 'ACTIVE' ? 'Activate Student Account' : 'Deactivate Student Account',
+                message: 'Change account status for "' + student.Full_Name + '" to ' + nextStatus + '?',
+                confirmText: nextStatus === 'ACTIVE' ? 'Activate' : 'Deactivate',
+                danger: nextStatus === 'INACTIVE'
+              });
+              if (ok) {
+                try {
+                  await window.API.updateStudentStatus({ studentId: id, status: nextStatus });
+                  window.Helpers.showToast('Student status updated to ' + nextStatus, 'success');
+                  await loadData();
+                } catch (err) {
+                  window.Helpers.showToast(err.message, 'error');
+                }
+              }
+            } else if (act === 'delete') {
+              const ok = await window.Helpers.confirmDialog({
+                title: 'Delete Student Account',
+                message: 'Are you sure you want to permanently delete "' + student.Full_Name + '" (' + student.Student_Code + ')?',
+                confirmText: 'Delete Student',
+                danger: true
+              });
+              if (ok) {
+                try {
+                  await window.API.deleteStudent({ studentId: id });
+                  window.Helpers.showToast('Student account deleted.', 'success');
+                  await loadData();
+                } catch (err) {
+                  window.Helpers.showToast(err.message, 'error');
+                }
+              }
+            }
+          });
+        });
+      }
+
+      // Add / Edit Student Modal Logic
+      const stuModal = document.getElementById('student-form-modal');
+      const stuForm = document.getElementById('student-form');
+      const stuErrors = document.getElementById('stu-form-errors');
+
+      document.getElementById('open-add-student-btn').addEventListener('click', function() {
+        document.getElementById('student-modal-title').innerHTML = '<i class="fa-solid fa-user-plus text-primary"></i> Add New Student';
+        document.getElementById('stu-id-field').value = '';
+        stuForm.reset();
+        document.getElementById('stu-password-group').classList.remove('d-none');
+        document.getElementById('stu-status-group').classList.add('d-none');
+        stuErrors.classList.add('d-none');
+        renderLevelCheckboxes('stu-levels-chips-container', []);
+        stuModal.classList.add('active');
+      });
+
+      function openEditStudentModal(stu) {
+        document.getElementById('student-modal-title').innerHTML = '<i class="fa-solid fa-user-pen text-primary"></i> Edit Student Information';
+        document.getElementById('stu-id-field').value = stu.Student_ID;
+        document.getElementById('stu-fullname').value = stu.Full_Name || '';
+        document.getElementById('stu-phone').value = stu.Phone || '';
+        document.getElementById('stu-code').value = stu.Student_Code || '';
+        document.getElementById('stu-status').value = stu.Account_Status || 'ACTIVE';
+        document.getElementById('stu-password-group').classList.add('d-none');
+        document.getElementById('stu-status-group').classList.remove('d-none');
+        stuErrors.classList.add('d-none');
+        renderLevelCheckboxes('stu-levels-chips-container', stu.Assigned_Level_IDs || []);
+        stuModal.classList.add('active');
+      }
+
+      document.getElementById('generate-code-btn').addEventListener('click', function() {
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('stu-code').value = 'STU-' + new Date().getFullYear() + '-' + rand;
+      });
+
+      document.querySelectorAll('[data-close-student-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { stuModal.classList.remove('active'); });
+      });
+
+      stuForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        stuErrors.classList.add('d-none');
+
+        const studentId = document.getElementById('stu-id-field').value.trim();
+        const isEdit = Boolean(studentId);
+        const selectedLevelIds = Array.from(document.querySelectorAll('#stu-levels-chips-container input[type="checkbox"]:checked')).map(function(cb) {
+          return cb.value;
+        });
+
+        const payload = {
+          studentId: studentId,
+          fullName: document.getElementById('stu-fullname').value.trim(),
+          phone: document.getElementById('stu-phone').value.trim(),
+          studentCode: document.getElementById('stu-code').value.trim(),
+          password: document.getElementById('stu-password').value,
+          status: document.getElementById('stu-status').value,
+          levelIds: selectedLevelIds
+        };
+
+        const check = window.Validation.validateStudentForm(payload, isEdit);
+        if (!check.valid) {
+          stuErrors.innerHTML = check.errors.map(function(err) { return '<div>&bull; ' + esc(err) + '</div>'; }).join('');
+          stuErrors.classList.remove('d-none');
+          return;
+        }
+
+        const saveBtn = document.getElementById('save-student-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner spinner-sm spinner-white"></span> Saving...';
+
+        try {
+          if (isEdit) {
+            await window.API.updateStudent(payload);
+            window.Helpers.showToast('Student information updated successfully.', 'success');
+          } else {
+            await window.API.createStudent(payload);
+            window.Helpers.showToast('New student account created successfully.', 'success');
+          }
+          stuModal.classList.remove('active');
+          await loadData();
+        } catch (err) {
+          stuErrors.textContent = err.message;
+          stuErrors.classList.remove('d-none');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Student Account';
+        }
+      });
+
+      // Reset Password Modal
+      const pwdModal = document.getElementById('reset-pwd-modal');
+      function openResetPwdModal(stu) {
+        document.getElementById('reset-pwd-student-id').value = stu.Student_ID;
+        document.getElementById('reset-pwd-student-name').textContent = stu.Full_Name + ' (' + stu.Student_Code + ')';
+        document.getElementById('new-student-password').value = '';
+        pwdModal.classList.add('active');
+      }
+      document.querySelectorAll('[data-close-pwd-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { pwdModal.classList.remove('active'); });
+      });
+      document.getElementById('reset-pwd-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const studentId = document.getElementById('reset-pwd-student-id').value;
+        const newPassword = document.getElementById('new-student-password').value;
+        try {
+          await window.API.resetStudentPassword({ studentId: studentId, newPassword: newPassword });
+          window.Helpers.showToast('Student password reset successfully.', 'success');
+          pwdModal.classList.remove('active');
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      // Manage Levels Modal
+      const levelsModal = document.getElementById('manage-levels-modal');
+      function openManageLevelsModal(stu) {
+        document.getElementById('manage-levels-student-id').value = stu.Student_ID;
+        document.getElementById('manage-levels-student-name').textContent = stu.Full_Name;
+        renderLevelCheckboxes('manage-levels-chips', stu.Assigned_Level_IDs || []);
+        levelsModal.classList.add('active');
+      }
+      document.querySelectorAll('[data-close-levels-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { levelsModal.classList.remove('active'); });
+      });
+      document.getElementById('manage-levels-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const studentId = document.getElementById('manage-levels-student-id').value;
+        const levelIds = Array.from(document.querySelectorAll('#manage-levels-chips input[type="checkbox"]:checked')).map(function(cb) {
+          return cb.value;
+        });
+        try {
+          await window.API.assignStudentLevels({ studentId: studentId, levelIds: levelIds });
+          window.Helpers.showToast('Assigned levels updated.', 'success');
+          levelsModal.classList.remove('active');
+          await loadData();
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        }
+      });
+
+      [searchInput, levelFilter, statusFilter, sortSelect].forEach(function(el) {
+        el.addEventListener('input', function() { currentPage = 1; renderTable(); });
+        el.addEventListener('change', function() { currentPage = 1; renderTable(); });
+      });
+
+      window.onBackendConnected = loadData;
+      loadData();
+    })();
+  </script>
+</body>
+</html>

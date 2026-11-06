@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "type": "task",
+  "task_id": "TASK_L001_001",
+  "title": "English Grammar & Vocabulary Practice Task",
+  "level_id": "LEVEL_001",
+  "lesson_id": "LESSON_001",
+  "description": "Comprehensive practice task covering all 8 supported question types including multiple choice, true/false, fill in the blanks, matching, ordering, short answer, and essay writing.",
+  "instructions": "Answer all questions carefully. Objective questions are graded automatically upon submission, while essay responses are reviewed by your instructor.",
+  "task_type": "practice",
+  "total_marks": 50,
+  "allow_attachments": true,
+  "_supported_question_types": [
+    "multiple_choice_single",
+    "multiple_choice_multiple",
+    "true_false",
+    "short_answer",
+    "fill_in_the_blanks",
+    "matching",
+    "ordering",
+    "essay"
+  ],
+  "questions": [
+    {
+      "question_id": "Q001",
+      "type": "multiple_choice_single",
+      "order": 1,
+      "difficulty": "easy",
+      "text": "Which of the following sentences uses the Present Perfect tense correctly?",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [
+        {
+          "option_id": "A",
+          "text": "She has visited London three times this year."
+        },
+        {
+          "option_id": "B",
+          "text": "She have visited London yesterday."
+        },
+        {
+          "option_id": "C",
+          "text": "She is visit London every summer."
+        },
+        {
+          "option_id": "D",
+          "text": "She visited London since 2020."
+        }
+      ],
+      "correct_answer": "A",
+      "points": 5,
+      "explanation": "The Present Perfect tense is formed with has/have + past participle ('has visited') for actions in an unfinished time period ('this year')."
+    },
+    {
+      "question_id": "Q002",
+      "type": "multiple_choice_multiple",
+      "order": 2,
+      "difficulty": "medium",
+      "text": "Select ALL words below that are synonyms of the adjective 'diligent':",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Hardworking"
+        },
+        {
+          "option_id": "B",
+          "text": "Industrious"
+        },
+        {
+          "option_id": "C",
+          "text": "Negligent"
+        },
+        {
+          "option_id": "D",
+          "text": "Conscientious"
+        }
+      ],
+      "correct_answer": ["A", "B", "D"],
+      "points": 6,
+      "explanation": "'Hardworking', 'industrious', and 'conscientious' all describe careful, persistent effort, whereas 'negligent' is an antonym."
+    },
+    {
+      "question_id": "Q003",
+      "type": "true_false",
+      "order": 3,
+      "difficulty": "easy",
+      "text": "In English grammar, an adverb can modify a verb, an adjective, or another adverb.",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [
+        {
+          "option_id": "TRUE",
+          "text": "True"
+        },
+        {
+          "option_id": "FALSE",
+          "text": "False"
+        }
+      ],
+      "correct_answer": "TRUE",
+      "points": 4,
+      "explanation": "Adverbs modify verbs ('runs quickly'), adjectives ('very tall'), or other adverbs ('quite easily')."
+    },
+    {
+      "question_id": "Q004",
+      "type": "short_answer",
+      "order": 4,
+      "difficulty": "medium",
+      "text": "What is the irregular past participle form of the verb 'write'?",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [],
+      "correct_answer": "written",
+      "points": 5,
+      "explanation": "The principal parts are write (base) -> wrote (past simple) -> written (past participle)."
+    },
+    {
+      "question_id": "Q005",
+      "type": "fill_in_the_blanks",
+      "order": 5,
+      "difficulty": "medium",
+      "text": "Complete the conditional sentence: If I _____ known about the meeting earlier, I would _____ attended it.",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [],
+      "correct_answer": ["had", "have"],
+      "points": 6,
+      "explanation": "Third conditional structure: If + subject + had + past participle, subject + would + have + past participle."
+    },
+    {
+      "question_id": "Q006",
+      "type": "matching",
+      "order": 6,
+      "difficulty": "medium",
+      "text": "Match each linguistic term on the left with its correct definition on the right:",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "pairs": [
+        {
+          "pair_id": "P1",
+          "left": "Synonym",
+          "right": "A word with the same or nearly the same meaning"
+        },
+        {
+          "pair_id": "P2",
+          "left": "Antonym",
+          "right": "A word opposite in meaning to another"
+        },
+        {
+          "pair_id": "P3",
+          "left": "Homophone",
+          "right": "A word pronounced the same as another but differing in meaning"
+        }
+      ],
+      "correct_answer": {
+        "P1": "A word with the same or nearly the same meaning",
+        "P2": "A word opposite in meaning to another",
+        "P3": "A word pronounced the same as another but differing in meaning"
+      },
+      "points": 6,
+      "explanation": "Synonyms share meaning, antonyms have opposite meanings, and homophones share pronunciation."
+    },
+    {
+      "question_id": "Q007",
+      "type": "ordering",
+      "order": 7,
+      "difficulty": "medium",
+      "text": "Arrange the following segments in the correct grammatical order to form a coherent sentence:",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "items": [
+        "Despite the heavy rain,",
+        "the dedicated students",
+        "arrived at the examination hall",
+        "twenty minutes before the start."
+      ],
+      "correct_answer": [
+        "Despite the heavy rain,",
+        "the dedicated students",
+        "arrived at the examination hall",
+        "twenty minutes before the start."
+      ],
+      "points": 8,
+      "explanation": "The introductory prepositional phrase is followed by the subject, verb phrase, and time adverbial."
+    },
+    {
+      "question_id": "Q008",
+      "type": "essay",
+      "order": 8,
+      "difficulty": "hard",
+      "text": "Write a short paragraph (80–120 words) explaining how online learning platforms help students track and improve their academic performance.",
+      "media": {
+        "image": null,
+        "audio": null,
+        "video": null
+      },
+      "options": [],
+      "correct_answer": "Model Rubric: Clear topic sentence (3 pts), two specific examples of analytics/feedback (4 pts), accurate grammar and vocabulary (3 pts).",
+      "points": 10,
+      "explanation": "Graded by the instructor based on coherence, argument quality, and grammatical accuracy."
+    }
+  ]
+}

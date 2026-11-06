@@ -1,0 +1,514 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Levels Management — Lingo Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link active"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Levels">Educational Levels Management</h1>
+            <p>Organize curriculum stages, Drive storage folders, display order, and active status</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="api-status-pill">
+            <span class="api-status-dot"></span>
+            <span class="api-status-label">GAS Backend</span>
+          </div>
+          <button type="button" class="btn btn-primary" id="open-add-level-btn">
+            <i class="fa-solid fa-plus"></i> Add New Level
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="level-search-input" class="form-control" placeholder="Search levels by name or description...">
+          </div>
+          <div class="filter-group">
+            <select id="level-status-filter" class="form-select" style="width:auto;min-width:160px;">
+              <option value="">All Statuses</option>
+              <option value="ACTIVE">Active Levels</option>
+              <option value="INACTIVE">Inactive Levels</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Levels Grid -->
+        <div id="levels-cards-container" class="levels-grid">
+          <div class="card" style="grid-column: 1 / -1;">
+            <div class="loading-state">
+              <span class="spinner"></span>
+              <p class="mt-2">Loading educational levels...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add / Edit Level Modal -->
+  <div class="modal-backdrop" id="level-form-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="level-modal-title"><i class="fa-solid fa-layer-group text-primary"></i> Create New Level</h3>
+        <button type="button" class="modal-close" data-close-level-modal>&times;</button>
+      </div>
+      <form id="level-form" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="lvl-id-field">
+          <div class="form-group">
+            <label class="form-label" for="lvl-name">Level Name <span class="required">*</span></label>
+            <input type="text" id="lvl-name" class="form-control" placeholder="e.g. Level A1 — Beginner Foundation" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="lvl-description">Level Description</label>
+            <textarea id="lvl-description" class="form-control" rows="3" placeholder="Describe the learning objectives and target skills for this level..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="lvl-icon">Level Icon Class or Image URL</label>
+              <input type="text" id="lvl-icon" class="form-control" value="fa-layer-group" placeholder="fa-layer-group or https://...">
+              <span class="form-hint">Use a FontAwesome icon (e.g. <code>fa-book-open</code>, <code>fa-star</code>, <code>fa-graduation-cap</code>) or image URL.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="lvl-color">Level Accent Color</label>
+              <div class="d-flex align-center gap-2">
+                <input type="color" id="lvl-color" class="form-control" value="#4f46e5" style="width:60px;height:42px;padding:4px;cursor:pointer;">
+                <input type="text" id="lvl-color-hex" class="form-control" value="#4f46e5" style="font-family:monospace;">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group mb-0">
+              <label class="form-label" for="lvl-order">Display Order</label>
+              <input type="number" id="lvl-order" class="form-control" min="1" value="1">
+            </div>
+
+            <div class="form-group mb-0">
+              <label class="form-label" for="lvl-status">Status</label>
+              <select id="lvl-status" class="form-select">
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-level-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="save-level-btn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Level
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Level Details Modal -->
+  <div class="modal-backdrop" id="level-details-modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="level-details-title"><i class="fa-solid fa-layer-group text-primary"></i> Level Details</h3>
+        <button type="button" class="modal-close" data-close-details-modal>&times;</button>
+      </div>
+      <div class="modal-body" id="level-details-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-details-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allLevels = [];
+
+      const container = document.getElementById('levels-cards-container');
+      const searchInput = document.getElementById('level-search-input');
+      const statusFilter = document.getElementById('level-status-filter');
+
+      const colorPicker = document.getElementById('lvl-color');
+      const colorHex = document.getElementById('lvl-color-hex');
+      colorPicker.addEventListener('input', function() { colorHex.value = colorPicker.value; });
+      colorHex.addEventListener('input', function() {
+        if (/^#[0-9a-fA-F]{6}$/.test(colorHex.value)) colorPicker.value = colorHex.value;
+      });
+
+      async function loadLevels() {
+        try {
+          allLevels = await window.API.getLevels({}, { skipCache: true });
+          renderLevels();
+        } catch (err) {
+          container.innerHTML = `<div class="card" style="grid-column:1/-1;"><div class="empty-state"><p class="text-danger">${esc(err.message)}</p></div></div>`;
+        }
+      }
+
+      function renderLevels() {
+        const q = searchInput.value.trim().toLowerCase();
+        const st = statusFilter.value;
+
+        const filtered = allLevels.filter(function(lvl) {
+          if (q) {
+            const matchName = String(lvl.Level_Name || '').toLowerCase().indexOf(q) !== -1;
+            const matchDesc = String(lvl.Description || '').toLowerCase().indexOf(q) !== -1;
+            if (!matchName && !matchDesc) return false;
+          }
+          if (st && String(lvl.Status).toUpperCase() !== st) return false;
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="card" style="grid-column: 1 / -1;">
+              <div class="empty-state">
+                <div class="empty-state-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <h3>No Educational Levels Found</h3>
+                <p>Create your first educational level to start adding lessons, exams, and coursework tasks.</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = filtered.map(function(lvl, idx) {
+          const color = lvl.Color || '#4f46e5';
+          const isImg = String(lvl.Image_URL || '').indexOf('http') === 0;
+          const iconHtml = isImg
+            ? `<img src="${esc(lvl.Image_URL)}" alt="${esc(lvl.Level_Name)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`
+            : `<i class="fa-solid ${esc(lvl.Image_URL || 'fa-layer-group')}"></i>`;
+          const isActive = String(lvl.Status).toUpperCase() === 'ACTIVE';
+
+          return `
+            <div class="level-card">
+              <div class="level-card-banner" style="background:${esc(color)};"></div>
+              <div class="level-card-body">
+                <div class="level-card-header">
+                  <div class="d-flex align-center gap-3">
+                    <div class="level-icon-box" style="background:${esc(color)};">${iconHtml}</div>
+                    <div>
+                      <div class="d-flex align-center gap-2">
+                        <span class="text-xs font-bold text-muted">ORDER #${lvl.Display_Order || (idx + 1)}</span>
+                        <code class="text-xs" style="color:var(--text-muted);">${esc(lvl.Level_ID)}</code>
+                      </div>
+                      <h3 style="font-size:1.15rem;margin-top:0.15rem;">${esc(lvl.Level_Name)}</h3>
+                    </div>
+                  </div>
+                  ${window.Helpers.renderStatusBadge(lvl.Status)}
+                </div>
+
+                <p class="text-sm text-secondary mb-3">${esc(lvl.Description || 'No description provided.')}</p>
+
+                <div class="level-stats-grid">
+                  <div class="level-stat-pill">
+                    <i class="fa-solid fa-book-open"></i>
+                    <div><span>Lessons</span><strong>${Number(lvl.Lessons_Count || 0)}</strong></div>
+                  </div>
+                  <div class="level-stat-pill">
+                    <i class="fa-solid fa-file-signature"></i>
+                    <div><span>Exams</span><strong>${Number(lvl.Exams_Count || 0)}</strong></div>
+                  </div>
+                  <div class="level-stat-pill">
+                    <i class="fa-solid fa-list-check"></i>
+                    <div><span>Tasks</span><strong>${Number(lvl.Tasks_Count || 0)}</strong></div>
+                  </div>
+                  <div class="level-stat-pill">
+                    <i class="fa-solid fa-users"></i>
+                    <div><span>Students</span><strong>${Number(lvl.Assigned_Students_Count || 0)}</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="d-flex gap-1">
+                  <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="move-up" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} title="Move Earlier"><i class="fa-solid fa-arrow-up"></i></button>
+                  <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="move-down" data-idx="${idx}" ${idx === filtered.length - 1 ? 'disabled' : ''} title="Move Later"><i class="fa-solid fa-arrow-down"></i></button>
+                  <button type="button" class="btn btn-secondary btn-sm" data-act="details" data-id="${esc(lvl.Level_ID)}">
+                    <i class="fa-solid fa-eye"></i> View Details
+                  </button>
+                </div>
+                <div class="d-flex gap-1">
+                  <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="toggle" data-id="${esc(lvl.Level_ID)}" title="${isActive ? 'Deactivate' : 'Activate'}">
+                    <i class="fa-solid ${isActive ? 'fa-toggle-on text-success' : 'fa-toggle-off text-muted'}"></i>
+                  </button>
+                  <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="edit" data-id="${esc(lvl.Level_ID)}" title="Edit Level"><i class="fa-solid fa-pen"></i></button>
+                  <button type="button" class="btn btn-icon btn-outline-danger btn-sm" data-act="delete" data-id="${esc(lvl.Level_ID)}" title="Delete Level"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        bindCardActions(filtered);
+      }
+
+      function bindCardActions(displayedList) {
+        container.querySelectorAll('[data-act]').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            const act = btn.getAttribute('data-act');
+            const id = btn.getAttribute('data-id');
+
+            if (act === 'move-up' || act === 'move-down') {
+              const idx = Number(btn.getAttribute('data-idx'));
+              const swapIdx = act === 'move-up' ? idx - 1 : idx + 1;
+              if (swapIdx < 0 || swapIdx >= displayedList.length) return;
+              const orderedIds = displayedList.map(function(l) { return l.Level_ID; });
+              const temp = orderedIds[idx];
+              orderedIds[idx] = orderedIds[swapIdx];
+              orderedIds[swapIdx] = temp;
+              try {
+                await window.API.reorderLevels({ levelIds: orderedIds });
+                window.Helpers.showToast('Levels reordered.', 'success');
+                await loadLevels();
+              } catch (err) {
+                window.Helpers.showToast(err.message, 'error');
+              }
+              return;
+            }
+
+            const level = allLevels.find(function(l) { return l.Level_ID === id; });
+            if (!level) return;
+
+            if (act === 'edit') {
+              openEditLevelModal(level);
+            } else if (act === 'details') {
+              openLevelDetailsModal(level.Level_ID);
+            } else if (act === 'toggle') {
+              const nextStatus = String(level.Status).toUpperCase() === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+              try {
+                await window.API.updateLevel({ levelId: id, status: nextStatus });
+                window.Helpers.showToast('Level status updated to ' + nextStatus, 'success');
+                await loadLevels();
+              } catch (err) {
+                window.Helpers.showToast(err.message, 'error');
+              }
+            } else if (act === 'delete') {
+              const ok = await window.Helpers.confirmDialog({
+                title: 'Delete Level',
+                message: 'Are you sure you want to delete "' + level.Level_Name + '"? Associated lessons, exams, and tasks under this level will also be removed.',
+                confirmText: 'Delete Level',
+                danger: true
+              });
+              if (ok) {
+                try {
+                  await window.API.deleteLevel({ levelId: id });
+                  window.Helpers.showToast('Level deleted.', 'success');
+                  await loadLevels();
+                } catch (err) {
+                  window.Helpers.showToast(err.message, 'error');
+                }
+              }
+            }
+          });
+        });
+      }
+
+      const modal = document.getElementById('level-form-modal');
+      const form = document.getElementById('level-form');
+
+      document.getElementById('open-add-level-btn').addEventListener('click', function() {
+        document.getElementById('level-modal-title').innerHTML = '<i class="fa-solid fa-layer-group text-primary"></i> Create New Level';
+        document.getElementById('lvl-id-field').value = '';
+        form.reset();
+        document.getElementById('lvl-icon').value = 'fa-layer-group';
+        document.getElementById('lvl-color').value = '#4f46e5';
+        document.getElementById('lvl-color-hex').value = '#4f46e5';
+        document.getElementById('lvl-order').value = allLevels.length + 1;
+        modal.classList.add('active');
+      });
+
+      function openEditLevelModal(lvl) {
+        document.getElementById('level-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Level';
+        document.getElementById('lvl-id-field').value = lvl.Level_ID;
+        document.getElementById('lvl-name').value = lvl.Level_Name || '';
+        document.getElementById('lvl-description').value = lvl.Description || '';
+        document.getElementById('lvl-icon').value = lvl.Image_URL || 'fa-layer-group';
+        document.getElementById('lvl-color').value = lvl.Color || '#4f46e5';
+        document.getElementById('lvl-color-hex').value = lvl.Color || '#4f46e5';
+        document.getElementById('lvl-order').value = lvl.Display_Order || 1;
+        document.getElementById('lvl-status').value = lvl.Status || 'ACTIVE';
+        modal.classList.add('active');
+      }
+
+      document.querySelectorAll('[data-close-level-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { modal.classList.remove('active'); });
+      });
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const levelId = document.getElementById('lvl-id-field').value.trim();
+        const levelName = document.getElementById('lvl-name').value.trim();
+        if (!levelName) {
+          window.Helpers.showToast('Level Name is required.', 'error');
+          return;
+        }
+
+        const payload = {
+          levelId: levelId,
+          levelName: levelName,
+          description: document.getElementById('lvl-description').value.trim(),
+          imageUrl: document.getElementById('lvl-icon').value.trim() || 'fa-layer-group',
+          color: document.getElementById('lvl-color-hex').value.trim() || '#4f46e5',
+          displayOrder: Number(document.getElementById('lvl-order').value || 1),
+          status: document.getElementById('lvl-status').value
+        };
+
+        const saveBtn = document.getElementById('save-level-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner spinner-sm spinner-white"></span> Saving...';
+
+        try {
+          if (levelId) {
+            await window.API.updateLevel(payload);
+            window.Helpers.showToast('Level updated successfully.', 'success');
+          } else {
+            await window.API.createLevel(payload);
+            window.Helpers.showToast('New level created and Drive folders initialized.', 'success');
+          }
+          modal.classList.remove('active');
+          await loadLevels();
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Level';
+        }
+      });
+
+      // Level Details Modal
+      const detailsModal = document.getElementById('level-details-modal');
+      const detailsBody = document.getElementById('level-details-body');
+      document.querySelectorAll('[data-close-details-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { detailsModal.classList.remove('active'); });
+      });
+
+      async function openLevelDetailsModal(levelId) {
+        detailsBody.innerHTML = `<div class="loading-state"><span class="spinner"></span><p class="mt-2">Loading level contents...</p></div>`;
+        detailsModal.classList.add('active');
+        try {
+          const data = await window.API.getLevelDetails({ levelId: levelId });
+          const lvl = data.level || {};
+          document.getElementById('level-details-title').innerHTML = `<i class="fa-solid fa-layer-group text-primary"></i> ${esc(lvl.Level_Name)} (${esc(lvl.Level_ID)})`;
+
+          detailsBody.innerHTML = `
+            <p class="text-secondary mb-4">${esc(lvl.Description || '')}</p>
+
+            <div class="d-flex justify-between align-center mb-2">
+              <h4 class="font-bold"><i class="fa-solid fa-book-open text-primary"></i> Lessons (${(data.lessons || []).length})</h4>
+              <a href="lessons.html?levelId=${encodeURIComponent(levelId)}" class="btn btn-outline-primary btn-sm">Manage Lessons &rarr;</a>
+            </div>
+            <div class="mb-4" style="background:var(--bg-body);padding:0.85rem;border-radius:8px;border:1px solid var(--border-color);">
+              ${(data.lessons || []).length > 0 ? data.lessons.map(function(l) {
+                return `<div class="d-flex justify-between align-center py-1" style="padding:0.4rem 0;border-bottom:1px solid var(--border-color);">
+                  <span><strong>#${l.Display_Order}</strong> ${esc(l.Lesson_Title)}</span>
+                  ${window.Helpers.renderStatusBadge(l.Status)}
+                </div>`;
+              }).join('') : '<span class="text-muted text-sm">No lessons created in this level yet.</span>'}
+            </div>
+
+            <div class="d-flex justify-between align-center mb-2">
+              <h4 class="font-bold"><i class="fa-solid fa-file-signature text-warning"></i> Exams (${(data.exams || []).length})</h4>
+              <a href="exams.html?levelId=${encodeURIComponent(levelId)}" class="btn btn-outline-primary btn-sm">Manage Exams &rarr;</a>
+            </div>
+            <div class="mb-4" style="background:var(--bg-body);padding:0.85rem;border-radius:8px;border:1px solid var(--border-color);">
+              ${(data.exams || []).length > 0 ? data.exams.map(function(e) {
+                return `<div class="d-flex justify-between align-center" style="padding:0.4rem 0;border-bottom:1px solid var(--border-color);">
+                  <span><strong>${esc(e.Exam_Title)}</strong> (${e.Duration} mins &bull; ${e.Total_Marks} marks)</span>
+                  ${window.Helpers.renderStatusBadge(e.Status)}
+                </div>`;
+              }).join('') : '<span class="text-muted text-sm">No exams created in this level yet.</span>'}
+            </div>
+
+            <div class="d-flex justify-between align-center mb-2">
+              <h4 class="font-bold"><i class="fa-solid fa-list-check text-success"></i> Tasks (${(data.tasks || []).length})</h4>
+              <a href="tasks.html?levelId=${encodeURIComponent(levelId)}" class="btn btn-outline-primary btn-sm">Manage Tasks &rarr;</a>
+            </div>
+            <div style="background:var(--bg-body);padding:0.85rem;border-radius:8px;border:1px solid var(--border-color);">
+              ${(data.tasks || []).length > 0 ? data.tasks.map(function(t) {
+                return `<div class="d-flex justify-between align-center" style="padding:0.4rem 0;border-bottom:1px solid var(--border-color);">
+                  <span><strong>${esc(t.Task_Title)}</strong> (${esc(t.Task_Type)} &bull; ${t.Max_Score} pts)</span>
+                  ${window.Helpers.renderStatusBadge(t.Status)}
+                </div>`;
+              }).join('') : '<span class="text-muted text-sm">No tasks created in this level yet.</span>'}
+            </div>
+          `;
+        } catch (err) {
+          detailsBody.innerHTML = `<p class="text-danger">${esc(err.message)}</p>`;
+        }
+      }
+
+      searchInput.addEventListener('input', renderLevels);
+      statusFilter.addEventListener('change', renderLevels);
+
+      window.onBackendConnected = loadLevels;
+      loadLevels();
+    })();
+  </script>
+</body>
+</html>

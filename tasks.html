@@ -1,0 +1,828 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasks Management — Lingo Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="sidebar-brand-text">
+          <h2>Lingo Admin</h2>
+          <span>Management System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Main Overview</span>
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span data-i18n="Dashboard">Dashboard</span></a>
+        <a href="students.html" class="nav-link"><i class="fa-solid fa-users"></i> <span data-i18n="Students">Students</span></a>
+
+        <span class="nav-section-label">Curriculum &amp; Content</span>
+        <a href="levels.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> <span data-i18n="Levels">Levels</span></a>
+        <a href="lessons.html" class="nav-link"><i class="fa-solid fa-book-open"></i> <span data-i18n="Lessons">Lessons</span></a>
+        <a href="exams.html" class="nav-link"><i class="fa-solid fa-file-signature"></i> <span data-i18n="Exams">Exams</span></a>
+        <a href="tasks.html" class="nav-link active"><i class="fa-solid fa-list-check"></i> <span data-i18n="Tasks">Tasks</span></a>
+
+        <span class="nav-section-label">Analytics &amp; System</span>
+        <a href="performance.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> <span data-i18n="Performance">Performance</span></a>
+        <a href="reports.html" class="nav-link"><i class="fa-solid fa-file-contract"></i> <span data-i18n="Reports">Reports</span></a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> <span data-i18n="Settings">Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-center justify-between">
+          <div class="d-flex align-center gap-2">
+            <div class="avatar avatar-sm" data-admin-avatar>AD</div>
+            <div>
+              <div class="text-sm font-bold" style="color:#fff;" data-admin-name>Admin</div>
+              <div class="text-xs" style="color:#94a3b8;" data-admin-role>SUPER_ADMIN</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" style="color:#38bdf8;" onclick="window.API.openConfigModal()" title="Backend API Settings">
+            <i class="fa-solid fa-plug"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-block">
+            <h1 data-i18n="Tasks">Tasks &amp; Assignments Management</h1>
+            <p>Create Drive-backed coursework tasks, manage deadlines, review student submissions, and provide teacher feedback</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <a href="templates/task_template.json" download="task_template.json" class="btn btn-secondary btn-sm" title="Download Task Starter JSON Template">
+            <i class="fa-solid fa-download text-success"></i> Task JSON Template
+          </a>
+          <button type="button" class="btn btn-primary" id="open-create-task-btn">
+            <i class="fa-solid fa-plus"></i> Add New Task
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Toolbar -->
+        <div class="card mb-4">
+          <div class="card-body" style="padding:1.15rem 1.4rem;">
+            <div class="toolbar" style="margin-bottom:0;">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="task-search-input" class="form-control" placeholder="Search tasks by title or Task ID...">
+              </div>
+              <div class="filter-group">
+                <select id="filter-task-level" class="form-select" style="width:auto;min-width:170px;">
+                  <option value="">All Levels</option>
+                </select>
+                <select id="filter-task-type" class="form-select" style="width:auto;min-width:150px;">
+                  <option value="">All Categories</option>
+                  <option value="practice">Practice</option>
+                  <option value="homework">Homework</option>
+                  <option value="worksheet">Worksheet</option>
+                  <option value="project">Project</option>
+                </select>
+                <select id="filter-task-status" class="form-select" style="width:auto;min-width:140px;">
+                  <option value="">All Statuses</option>
+                  <option value="ACTIVE">Published (Active)</option>
+                  <option value="INACTIVE">Unpublished</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tasks Table -->
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Task Title &amp; ID</th>
+                  <th>Level / Lesson</th>
+                  <th>Category &amp; Score</th>
+                  <th>Deadline</th>
+                  <th>Submissions</th>
+                  <th>Status</th>
+                  <th style="text-align:end;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tasks-tbody">
+                <tr>
+                  <td colspan="7" class="loading-state">
+                    <span class="spinner"></span>
+                    <p class="mt-2">Loading tasks from Google Sheets &amp; Drive...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Create / Edit Task Modal -->
+  <div class="modal-backdrop" id="task-editor-modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 class="modal-title" id="task-modal-title"><i class="fa-solid fa-list-check text-primary"></i> Add New Task</h3>
+        <div class="d-flex align-center gap-2">
+          <label class="btn btn-outline-primary btn-sm" style="cursor:pointer;">
+            <i class="fa-solid fa-file-import"></i> Import Task JSON
+            <input type="file" id="import-task-json-input" class="d-none" accept=".json,application/json">
+          </label>
+          <button type="button" class="btn btn-secondary btn-sm" id="export-current-task-json-btn">
+            <i class="fa-solid fa-file-export"></i> Export JSON
+          </button>
+          <button type="button" class="modal-close" data-close-task-modal>&times;</button>
+        </div>
+      </div>
+
+      <form id="task-form" novalidate style="display:flex;flex-direction:column;flex:1;min-height:0;">
+        <div class="modal-body">
+          <input type="hidden" id="task-id-field">
+          <div id="task-json-validation-box" class="d-none" style="padding:0.9rem 1.1rem;border-radius:8px;margin-bottom:1rem;font-size:0.86rem;"></div>
+
+          <div class="card mb-4" style="background:var(--bg-body);">
+            <div class="card-body" style="padding:1.15rem;">
+              <h4 class="font-bold mb-3" style="font-size:0.95rem;"><i class="fa-solid fa-circle-info text-primary"></i> 1. Task Information &amp; Curriculum Link</h4>
+              <div class="form-row-3">
+                <div class="form-group">
+                  <label class="form-label" for="task-level-select">Select Level <span class="required">*</span></label>
+                  <select id="task-level-select" class="form-select" required>
+                    <option value="">-- Select Level --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="task-lesson-select">Select Lesson (Optional)</label>
+                  <select id="task-lesson-select" class="form-select" disabled>
+                    <option value="">-- General Level Task --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="task-title-input">Task Title <span class="required">*</span></label>
+                  <input type="text" id="task-title-input" class="form-control" placeholder="e.g. Unit 1 Grammar Practice Worksheet" required disabled>
+                </div>
+              </div>
+
+              <div class="form-row-3">
+                <div class="form-group">
+                  <label class="form-label" for="task-type-select">Task Type / Category</label>
+                  <select id="task-type-select" class="form-select">
+                    <option value="practice">Practice Exercise</option>
+                    <option value="homework">Homework Assignment</option>
+                    <option value="worksheet">Interactive Worksheet</option>
+                    <option value="project">Project / Written Task</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="task-deadline-input">Submission Deadline (Optional)</label>
+                  <input type="datetime-local" id="task-deadline-input" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="task-status-select">Task Status</label>
+                  <select id="task-status-select" class="form-select">
+                    <option value="ACTIVE">ACTIVE (Published)</option>
+                    <option value="INACTIVE">INACTIVE (Unpublished)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group mb-0">
+                  <label class="form-label" for="task-desc-input">Task Description</label>
+                  <input type="text" id="task-desc-input" class="form-control" placeholder="Summary of the task learning goals...">
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label" for="task-instructions-input">Student Instructions</label>
+                  <input type="text" id="task-instructions-input" class="form-control" value="Answer all questions carefully before submitting.">
+                </div>
+              </div>
+
+              <div class="mt-3 pt-2" style="border-top:1px solid var(--border-color);">
+                <label class="checkbox-chip">
+                  <input type="checkbox" id="task-allow-attachments">
+                  <span><i class="fa-solid fa-paperclip"></i> Allow Students to Upload Media Attachments with their Submission</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Rich Question Editor -->
+          <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3">
+            <div>
+              <h4 class="font-bold" style="font-size:1.05rem;">
+                <i class="fa-solid fa-list-ol text-primary"></i> 2. Task Questions Builder
+                <span class="badge badge-primary" id="task-questions-count-badge">0 Questions</span>
+                <span class="badge badge-success" id="task-total-marks-badge">Maximum Score: 0</span>
+              </h4>
+            </div>
+            <div class="d-flex align-center gap-2">
+              <select id="add-task-qtype-selector" class="form-select" style="width:auto;font-size:0.85rem;">
+                <option value="multiple_choice_single">+ Multiple Choice (Single)</option>
+                <option value="multiple_choice_multiple">+ Multiple Choice (Multiple)</option>
+                <option value="true_false">+ True / False</option>
+                <option value="short_answer">+ Short Answer</option>
+                <option value="fill_in_the_blanks">+ Fill in the Blanks</option>
+                <option value="matching">+ Matching Pairs</option>
+                <option value="ordering">+ Ordering Sequence</option>
+                <option value="essay">+ Essay Question</option>
+              </select>
+              <button type="button" class="btn btn-primary btn-sm" id="add-task-question-btn">
+                <i class="fa-solid fa-plus"></i> Add Question
+              </button>
+            </div>
+          </div>
+
+          <div id="task-question-editor-mount"></div>
+        </div>
+
+        <div class="modal-footer justify-between">
+          <div class="text-xs text-muted">
+            <i class="fa-brands fa-google-drive text-success"></i> Saved as an individual JSON file in <code>Examination_Platform/Levels/.../Tasks/</code>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" data-close-task-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary" id="save-task-submit-btn">
+              <i class="fa-solid fa-floppy-disk"></i> Save Task to Drive &amp; Sheets
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Task Submissions & Grading Modal -->
+  <div class="modal-backdrop" id="task-submissions-modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-clipboard-check text-primary"></i> Student Task Submissions &amp; Grading</h3>
+        <button type="button" class="modal-close" data-close-subs-modal>&times;</button>
+      </div>
+      <div class="modal-body" id="task-submissions-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-subs-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/validation.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script>
+    (async function() {
+      const session = await window.Auth.requireAdmin();
+      if (!session) return;
+
+      const esc = window.Helpers.escapeHtml;
+      let allLevels = [];
+      let allLessons = [];
+      let allTasks = [];
+
+      const tbody = document.getElementById('tasks-tbody');
+      const searchInput = document.getElementById('task-search-input');
+      const levelFilter = document.getElementById('filter-task-level');
+      const typeFilter = document.getElementById('filter-task-type');
+      const statusFilter = document.getElementById('filter-task-status');
+
+      const taskLevelSelect = document.getElementById('task-level-select');
+      const taskLessonSelect = document.getElementById('task-lesson-select');
+      const taskTitleInput = document.getElementById('task-title-input');
+
+      const qEditor = window.Helpers.createQuestionEditor(
+        document.getElementById('task-question-editor-mount'),
+        {
+          onChange: function(qList, totalPts) {
+            document.getElementById('task-questions-count-badge').textContent = qList.length + ' Questions';
+            document.getElementById('task-total-marks-badge').textContent = 'Maximum Score: ' + totalPts;
+          }
+        }
+      );
+
+      document.getElementById('add-task-question-btn').addEventListener('click', function() {
+        const type = document.getElementById('add-task-qtype-selector').value;
+        qEditor.addQuestion(type);
+      });
+
+      const qParamLevel = window.Helpers.getQueryParam('levelId') || '';
+      const qParamLesson = window.Helpers.getQueryParam('lessonId') || '';
+
+      async function loadData() {
+        try {
+          const res = await Promise.all([
+            window.API.getLevels({}, { skipCache: true }),
+            window.API.getLessons(),
+            window.API.getTasks()
+          ]);
+          allLevels = res[0] || [];
+          allLessons = res[1] || [];
+          allTasks = res[2] || [];
+
+          populateDropdowns();
+          if (qParamLevel && !levelFilter.value) levelFilter.value = qParamLevel;
+          renderTable();
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><p class="text-danger">${esc(err.message)}</p></td></tr>`;
+        }
+      }
+
+      function populateDropdowns() {
+        const curFilter = levelFilter.value;
+        levelFilter.innerHTML = `<option value="">All Levels</option>` + allLevels.map(function(l) {
+          return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)}</option>`;
+        }).join('');
+        levelFilter.value = curFilter;
+
+        taskLevelSelect.innerHTML = `<option value="">-- Select Level --</option>` + allLevels.map(function(l) {
+          return `<option value="${esc(l.Level_ID)}">${esc(l.Level_Name)} (${esc(l.Level_ID)})</option>`;
+        }).join('');
+      }
+
+      function populateLessonsForLevel(levelId, selectedLessonId) {
+        if (!levelId) {
+          taskLessonSelect.innerHTML = `<option value="">-- General Level Task --</option>`;
+          taskLessonSelect.disabled = true;
+          taskTitleInput.disabled = true;
+          return;
+        }
+        taskLessonSelect.disabled = false;
+        taskTitleInput.disabled = false;
+        const levelLessons = allLessons.filter(function(les) {
+          return String(les.Level_ID) === String(levelId);
+        });
+        taskLessonSelect.innerHTML = `<option value="">-- General Level Task --</option>` +
+          levelLessons.map(function(les) {
+            return `<option value="${esc(les.Lesson_ID)}">${esc(les.Lesson_Title)}</option>`;
+          }).join('');
+        if (selectedLessonId) {
+          taskLessonSelect.value = selectedLessonId;
+        }
+      }
+
+      taskLevelSelect.addEventListener('change', function() {
+        populateLessonsForLevel(taskLevelSelect.value, '');
+      });
+
+      function renderTable() {
+        const q = searchInput.value.trim().toLowerCase();
+        const lvl = levelFilter.value;
+        const tp = typeFilter.value;
+        const st = statusFilter.value;
+
+        const filtered = allTasks.filter(function(tk) {
+          if (q) {
+            const mTitle = String(tk.Task_Title || '').toLowerCase().indexOf(q) !== -1;
+            const mId = String(tk.Task_ID || '').toLowerCase().indexOf(q) !== -1;
+            if (!mTitle && !mId) return false;
+          }
+          if (lvl && String(tk.Level_ID) !== lvl) return false;
+          if (tp && String(tk.Task_Type).toLowerCase() !== tp) return false;
+          if (st && String(tk.Status).toUpperCase() !== st) return false;
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" class="empty-state">
+                <div class="empty-state-icon"><i class="fa-solid fa-list-check"></i></div>
+                <h3>No Tasks Found</h3>
+                <p>Click "Add New Task" or import a Task JSON template to create coursework assignments.</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(function(tk) {
+          const isActive = String(tk.Status).toUpperCase() === 'ACTIVE';
+          const pendingCnt = Number(tk.Pending_Grading_Count || 0);
+
+          return `
+            <tr>
+              <td>
+                <div class="font-bold">${esc(tk.Task_Title)}</div>
+                <code class="text-xs text-muted">${esc(tk.Task_ID)}</code>
+              </td>
+              <td>
+                <span class="badge badge-primary">${esc(tk.Level_Name || tk.Level_ID)}</span>
+                ${tk.Lesson_Title ? `<div class="text-xs text-muted mt-1"><i class="fa-solid fa-book-open"></i> ${esc(tk.Lesson_Title)}</div>` : ''}
+              </td>
+              <td>
+                <span class="badge badge-secondary">${esc((tk.Task_Type || 'practice').toUpperCase())}</span>
+                <div class="text-xs text-muted mt-1">Max Score: <strong>${tk.Max_Score}</strong></div>
+              </td>
+              <td class="text-xs">
+                ${tk.Deadline ? `<span>${window.Helpers.formatDateTime(tk.Deadline)}</span>` : '<span class="text-muted">No Deadline</span>'}
+              </td>
+              <td>
+                <div class="font-semibold">${Number(tk.Submissions_Count || 0)} Submitted</div>
+                ${pendingCnt > 0 ? `<span class="badge badge-warning mt-1">${pendingCnt} Needs Grading</span>` : `<span class="text-xs text-muted">Avg: ${Number(tk.Average_Percentage || 0)}%</span>`}
+              </td>
+              <td>${window.Helpers.renderStatusBadge(tk.Status)}</td>
+              <td style="text-align:end;white-space:nowrap;">
+                <button type="button" class="btn btn-secondary btn-sm" data-act="submissions" data-id="${esc(tk.Task_ID)}" title="Review & Grade Student Submissions">
+                  <i class="fa-solid fa-user-check text-primary"></i> Submissions (${Number(tk.Submissions_Count || 0)})
+                </button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="edit" data-id="${esc(tk.Task_ID)}" title="Edit Task"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="duplicate" data-id="${esc(tk.Task_ID)}" title="Duplicate Task"><i class="fa-solid fa-copy"></i></button>
+                <button type="button" class="btn btn-icon btn-secondary btn-sm" data-act="toggle" data-id="${esc(tk.Task_ID)}" title="${isActive ? 'Unpublish' : 'Publish'}">
+                  <i class="fa-solid ${isActive ? 'fa-toggle-on text-success' : 'fa-toggle-off text-muted'}"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-outline-danger btn-sm" data-act="delete" data-id="${esc(tk.Task_ID)}" title="Delete Task"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('[data-act]').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            const act = btn.getAttribute('data-act');
+            const id = btn.getAttribute('data-id');
+            const tk = allTasks.find(function(x) { return x.Task_ID === id; });
+            if (!tk) return;
+
+            if (act === 'edit') {
+              await openEditTaskModal(id);
+            } else if (act === 'submissions') {
+              await openSubmissionsModal(id);
+            } else if (act === 'duplicate') {
+              try {
+                window.Helpers.showToast('Duplicating task in Google Drive...', 'info');
+                await window.API.duplicateTask({ taskId: id });
+                window.Helpers.showToast('Task duplicated successfully.', 'success');
+                await loadData();
+              } catch (err) {
+                window.Helpers.showToast(err.message, 'error');
+              }
+            } else if (act === 'toggle') {
+              const nextStatus = String(tk.Status).toUpperCase() === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+              try {
+                await window.API.updateTask({ taskId: id, status: nextStatus });
+                window.Helpers.showToast('Task ' + (nextStatus === 'ACTIVE' ? 'published' : 'unpublished') + '.', 'success');
+                await loadData();
+              } catch (err) {
+                window.Helpers.showToast(err.message, 'error');
+              }
+            } else if (act === 'delete') {
+              const ok = await window.Helpers.confirmDialog({
+                title: 'Delete Task & Drive JSON',
+                message: 'Are you sure you want to delete "' + tk.Task_Title + '"?',
+                confirmText: 'Delete Task',
+                danger: true
+              });
+              if (ok) {
+                try {
+                  await window.API.deleteTask({ taskId: id });
+                  window.Helpers.showToast('Task deleted.', 'success');
+                  await loadData();
+                } catch (err) {
+                  window.Helpers.showToast(err.message, 'error');
+                }
+              }
+            }
+          });
+        });
+      }
+
+      const editorModal = document.getElementById('task-editor-modal');
+      const taskForm = document.getElementById('task-form');
+      const valBox = document.getElementById('task-json-validation-box');
+
+      document.getElementById('open-create-task-btn').addEventListener('click', function() {
+        document.getElementById('task-modal-title').innerHTML = '<i class="fa-solid fa-list-check text-primary"></i> Add New Task';
+        document.getElementById('task-id-field').value = '';
+        taskForm.reset();
+        valBox.classList.add('d-none');
+
+        const initialLevel = levelFilter.value || qParamLevel || '';
+        taskLevelSelect.value = initialLevel;
+        populateLessonsForLevel(initialLevel, qParamLesson);
+
+        qEditor.setQuestions([]);
+        qEditor.addQuestion('multiple_choice_single');
+        editorModal.classList.add('active');
+      });
+
+      async function openEditTaskModal(taskId) {
+        try {
+          window.Helpers.showToast('Loading task JSON from Google Drive...', 'info', 1800);
+          const fullTask = await window.API.getTaskById({ taskId: taskId });
+          const tj = fullTask.taskJson || {};
+
+          document.getElementById('task-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Task (' + esc(fullTask.Task_ID) + ')';
+          document.getElementById('task-id-field').value = fullTask.Task_ID;
+          valBox.classList.add('d-none');
+
+          taskLevelSelect.value = fullTask.Level_ID;
+          populateLessonsForLevel(fullTask.Level_ID, fullTask.Lesson_ID);
+          taskTitleInput.value = fullTask.Task_Title || tj.title || '';
+          document.getElementById('task-type-select').value = fullTask.Task_Type || tj.task_type || 'practice';
+          document.getElementById('task-deadline-input').value = fullTask.Deadline ? String(fullTask.Deadline).substring(0, 16) : '';
+          document.getElementById('task-status-select').value = fullTask.Status || 'ACTIVE';
+          document.getElementById('task-desc-input').value = tj.description || '';
+          document.getElementById('task-instructions-input').value = tj.instructions || '';
+          document.getElementById('task-allow-attachments').checked = Boolean(tj.allow_attachments);
+
+          qEditor.setQuestions(tj.questions || []);
+          editorModal.classList.add('active');
+        } catch (err) {
+          window.Helpers.showToast('Failed to load task: ' + err.message, 'error');
+        }
+      }
+
+      document.querySelectorAll('[data-close-task-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { editorModal.classList.remove('active'); });
+      });
+
+      // Import Task JSON
+      document.getElementById('import-task-json-input').addEventListener('change', function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const check = window.Validation.validateAssessmentJson(evt.target.result, 'task', {
+            availableLevels: allLevels,
+            availableLessons: allLessons
+          });
+
+          valBox.classList.remove('d-none');
+          if (!check.valid) {
+            valBox.style.background = '#fee2e2';
+            valBox.style.color = '#991b1b';
+            valBox.innerHTML = `<strong><i class="fa-solid fa-circle-xmark"></i> Invalid Task JSON File:</strong><br>` +
+              check.errors.map(function(err) { return '&bull; ' + esc(err); }).join('<br>');
+            e.target.value = '';
+            return;
+          }
+
+          const obj = check.parsed;
+          if (obj.level_id && allLevels.some(function(l) { return l.Level_ID === obj.level_id; })) {
+            taskLevelSelect.value = obj.level_id;
+            populateLessonsForLevel(obj.level_id, obj.lesson_id || '');
+          } else if (taskLevelSelect.value) {
+            populateLessonsForLevel(taskLevelSelect.value, '');
+          }
+
+          taskTitleInput.disabled = false;
+          taskTitleInput.value = obj.title || '';
+          document.getElementById('task-type-select').value = obj.task_type || 'practice';
+          document.getElementById('task-desc-input').value = obj.description || '';
+          document.getElementById('task-instructions-input').value = obj.instructions || '';
+          document.getElementById('task-allow-attachments').checked = Boolean(obj.allow_attachments);
+          qEditor.setQuestions(obj.questions || []);
+
+          valBox.style.background = '#d1fae5';
+          valBox.style.color = '#065f46';
+          valBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <strong>Task JSON Validated &amp; Loaded!</strong> (${obj.questions.length} questions, ${check.calculatedTotalMarks} total marks).`;
+          e.target.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      // Export Task JSON
+      document.getElementById('export-current-task-json-btn').addEventListener('click', function() {
+        const taskId = document.getElementById('task-id-field').value || 'TASK_L001_001';
+        const qList = qEditor.getQuestions();
+        const jsonObj = {
+          schema_version: '1.0',
+          type: 'task',
+          task_id: taskId,
+          title: taskTitleInput.value.trim() || 'Sample Task',
+          level_id: taskLevelSelect.value || 'LEVEL_001',
+          lesson_id: taskLessonSelect.value || '',
+          description: document.getElementById('task-desc-input').value.trim(),
+          instructions: document.getElementById('task-instructions-input').value.trim(),
+          task_type: document.getElementById('task-type-select').value,
+          total_marks: qEditor.getTotalPoints(),
+          questions: qList
+        };
+        window.Helpers.downloadJsonFile(taskId + '.json', jsonObj);
+      });
+
+      taskForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const taskId = document.getElementById('task-id-field').value.trim();
+        const levelId = taskLevelSelect.value;
+        const lessonId = taskLessonSelect.value;
+        const title = taskTitleInput.value.trim();
+        const questions = qEditor.getQuestions();
+        const maxScore = qEditor.getTotalPoints();
+
+        if (!levelId) {
+          window.Helpers.showToast('Please select a Level before saving the task.', 'error');
+          return;
+        }
+        if (!title) {
+          window.Helpers.showToast('Task Title is required.', 'error');
+          return;
+        }
+        if (questions.length === 0) {
+          window.Helpers.showToast('Please add at least one question to the task.', 'error');
+          return;
+        }
+
+        const payload = {
+          taskId: taskId,
+          levelId: levelId,
+          lessonId: lessonId,
+          taskTitle: title,
+          taskType: document.getElementById('task-type-select').value,
+          description: document.getElementById('task-desc-input').value.trim(),
+          instructions: document.getElementById('task-instructions-input').value.trim(),
+          maxScore: maxScore,
+          deadline: document.getElementById('task-deadline-input').value,
+          status: document.getElementById('task-status-select').value,
+          allowAttachments: document.getElementById('task-allow-attachments').checked,
+          questions: questions
+        };
+
+        const saveBtn = document.getElementById('save-task-submit-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner spinner-sm spinner-white"></span> Saving to Drive...';
+
+        try {
+          if (taskId) {
+            await window.API.updateTask(payload);
+            window.Helpers.showToast('Task JSON updated in Google Drive & Sheets.', 'success');
+          } else {
+            await window.API.createTask(payload);
+            window.Helpers.showToast('New Task JSON created in Google Drive & Sheets.', 'success');
+          }
+          editorModal.classList.remove('active');
+          await loadData();
+        } catch (err) {
+          window.Helpers.showToast(err.message, 'error');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Task to Drive & Sheets';
+        }
+      });
+
+      // Student Task Submissions & Manual Grading Modal
+      const subsModal = document.getElementById('task-submissions-modal');
+      const subsBody = document.getElementById('task-submissions-modal-body');
+      document.querySelectorAll('[data-close-subs-modal]').forEach(function(b) {
+        b.addEventListener('click', function() { subsModal.classList.remove('active'); });
+      });
+
+      async function openSubmissionsModal(taskId) {
+        subsBody.innerHTML = `<div class="loading-state"><span class="spinner"></span><p class="mt-2">Loading student submissions...</p></div>`;
+        subsModal.classList.add('active');
+        try {
+          const list = await window.API.getTaskResults({ taskId: taskId });
+          if (!list || list.length === 0) {
+            subsBody.innerHTML = `<div class="empty-state"><p>No student submissions for this task yet.</p></div>`;
+            return;
+          }
+
+          subsBody.innerHTML = `
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Submitted At</th>
+                    <th>Submission Status</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Grading Status</th>
+                    <th>Teacher Feedback</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(function(sub) {
+                    return `
+                      <tr>
+                        <td><strong>${esc(sub.Student_Name)}</strong><br><code class="text-xs">${esc(sub.Student_Code)}</code></td>
+                        <td>${window.Helpers.formatDateTime(sub.Submission_Date)}</td>
+                        <td>${window.Helpers.renderStatusBadge(sub.Submission_Status)}</td>
+                        <td>${sub.Score} / ${sub.Total_Marks}</td>
+                        <td><strong>${sub.Percentage}%</strong></td>
+                        <td>${window.Helpers.renderStatusBadge(sub.Grading_Status)}</td>
+                        <td class="text-xs text-secondary">${esc(sub.Teacher_Feedback || '—')}</td>
+                        <td>
+                          <button type="button" class="btn btn-primary btn-sm" data-grade-sub="${esc(sub.Submission_ID)}">
+                            <i class="fa-solid fa-pen-clip"></i> Review &amp; Grade
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+            <div id="sub-review-detail-pane" class="mt-4"></div>
+          `;
+
+          subsBody.querySelectorAll('[data-grade-sub]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              inspectTaskSubmission(btn.getAttribute('data-grade-sub'), taskId);
+            });
+          });
+        } catch (err) {
+          subsBody.innerHTML = `<p class="text-danger">${esc(err.message)}</p>`;
+        }
+      }
+
+      async function inspectTaskSubmission(submissionId, taskId) {
+        const pane = document.getElementById('sub-review-detail-pane');
+        if (!pane) return;
+        pane.innerHTML = `<div class="loading-state"><span class="spinner"></span></div>`;
+        try {
+          const detail = await window.API.getTaskResults({ submissionId: submissionId });
+          const breakdown = (detail.Details && detail.Details.breakdown) || [];
+          const attachments = (detail.Details && detail.Details.attachments) || [];
+
+          pane.innerHTML = `
+            <div class="card" style="border:2px solid var(--primary);">
+              <div class="card-header">
+                <h4 class="card-title">Review Submission — ${esc(detail.Student_Name)}</h4>
+              </div>
+              <div class="card-body">
+                ${breakdown.map(function(item, idx) {
+                  return `
+                    <div style="padding:0.9rem;border:1px solid var(--border-color);border-radius:8px;margin-bottom:0.75rem;background:var(--bg-body);">
+                      <div class="d-flex justify-between align-center mb-1">
+                        <strong>Q${idx + 1}: ${esc(item.text)} (${esc(item.type)})</strong>
+                        <div class="d-flex align-center gap-2">
+                          <label class="text-xs font-bold">Points (Max ${item.points}):</label>
+                          <input type="number" step="0.5" min="0" max="${item.points}" value="${item.earned_points}" class="form-control" style="width:85px;padding:4px 8px;" data-manual-task-qgrade="${esc(item.question_id)}">
+                        </div>
+                      </div>
+                      <div class="text-sm"><strong>Student Answer:</strong> <code>${esc(JSON.stringify(item.student_answer))}</code></div>
+                      <div class="text-sm text-muted"><strong>Expected Answer / Rubric:</strong> <code>${esc(JSON.stringify(item.correct_answer))}</code></div>
+                    </div>
+                  `;
+                }).join('')}
+
+                ${attachments.length > 0 ? `
+                  <div class="mb-3">
+                    <h5 class="font-bold mb-1">Student Uploaded Attachments (${attachments.length})</h5>
+                    ${attachments.map(function(a) {
+                      return `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="badge badge-info mr-2"><i class="fa-solid fa-paperclip"></i> ${esc(a.file_name)}</a>`;
+                    }).join(' ')}
+                  </div>
+                ` : ''}
+
+                <div class="form-group mt-3">
+                  <label class="form-label">Teacher Feedback &amp; Comments</label>
+                  <textarea id="manual-task-feedback" class="form-control" rows="2" placeholder="Write constructive feedback for the student...">${esc(detail.Teacher_Feedback || '')}</textarea>
+                </div>
+
+                <button type="button" class="btn btn-success" id="save-manual-task-grade-btn">
+                  <i class="fa-solid fa-check"></i> Save Grade &amp; Publish Feedback
+                </button>
+              </div>
+            </div>
+          `;
+
+          document.getElementById('save-manual-task-grade-btn').addEventListener('click', async function() {
+            const questionGrades = {};
+            pane.querySelectorAll('[data-manual-task-qgrade]').forEach(function(inp) {
+              questionGrades[inp.getAttribute('data-manual-task-qgrade')] = { points: Number(inp.value) };
+            });
+            try {
+              await window.API.gradeTask({
+                submissionId: submissionId,
+                questionGrades: questionGrades,
+                feedback: document.getElementById('manual-task-feedback').value
+              });
+              window.Helpers.showToast('Task graded and teacher feedback saved!', 'success');
+              await openSubmissionsModal(taskId);
+              await loadData();
+            } catch (err) {
+              window.Helpers.showToast(err.message, 'error');
+            }
+          });
+        } catch (err) {
+          pane.innerHTML = `<p class="text-danger">${esc(err.message)}</p>`;
+        }
+      }
+
+      searchInput.addEventListener('input', renderTable);
+      levelFilter.addEventListener('change', renderTable);
+      typeFilter.addEventListener('change', renderTable);
+      statusFilter.addEventListener('change', renderTable);
+
+      window.onBackendConnected = loadData;
+      loadData();
+    })();
+  </script>
+</body>
+</html>
